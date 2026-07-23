@@ -26,7 +26,20 @@ Skills are organized by **lifecycle stage** — the moment in work when you reac
 
 ## System Architecture & Documentation
 
-This library is a closed-loop system for agentic software engineering. The core documentation has been split into a dedicated multi-part guide that details each component in depth:
+This library is a closed-loop system for agentic software engineering — five parts, each feeding the next, with the loop closing back into the skills themselves:
+
+```mermaid
+graph LR
+    A["Skills<br/><b>The What</b><br/>59 SKILL.md files<br/>design·build·safety·eval·ops·evolve·dev"] --> B["Router<br/><b>The When</b><br/>ROUTING.md<br/>AUTO / PROPOSE / ASK"]
+    B --> C["Eval Gate<br/><b>The Gate</b><br/>eval-harness · verifier-design<br/>llm-judge · silent-failure-audit"]
+    C --> D["Local Evolution<br/><b>The Engine</b><br/>evolution-scan/canary/propagate<br/>routing-tuner · skill-distillation"]
+    D --> E["Community Evolution<br/><b>The Commons</b><br/>culture-telemetry<br/>anonymized aggregates only"]
+    E -.validated norms feed back.-> A
+
+    C -.measured against real tasks.-> F[("simulator/ + EXPERIMENTS.md<br/>real Haiku/Gemini effect sizes,<br/>not assumed ones")]
+```
+
+The core documentation has been split into a dedicated multi-part guide that details each component in depth:
 
 *   **[Documentation Index](docs/intro.md)**: A high-level overview.
 *   **[The Skills Catalog (The "What")](docs/skills_doc.md)**: A thin, generated index of all 59 skills — each self-documents in its own `SKILL.md`.
