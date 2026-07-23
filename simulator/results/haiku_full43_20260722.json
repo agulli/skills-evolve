@@ -1,0 +1,161 @@
+{
+  "model": "haiku",
+  "mode": "real",
+  "skill_effects": {
+    "secrets-management": {
+      "effect": 0.129,
+      "n_paired": 240,
+      "with_pass": 0.533,
+      "without_pass": 0.404,
+      "effect_ci95": [
+        0.052,
+        0.206
+      ],
+      "significant": true,
+      "direction": "helps"
+    },
+    "context-engineering": {
+      "effect": 0.113,
+      "n_paired": 240,
+      "with_pass": 0.992,
+      "without_pass": 0.879,
+      "effect_ci95": [
+        0.069,
+        0.156
+      ],
+      "significant": true,
+      "direction": "helps"
+    },
+    "prompt-architecture": {
+      "effect": 0.044,
+      "n_paired": 180,
+      "with_pass": 0.917,
+      "without_pass": 0.872,
+      "effect_ci95": [
+        -0.015,
+        0.104
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "grounding-citation": {
+      "effect": 0.639,
+      "n_paired": 180,
+      "with_pass": 0.994,
+      "without_pass": 0.356,
+      "effect_ci95": [
+        0.569,
+        0.709
+      ],
+      "significant": true,
+      "direction": "helps"
+    },
+    "tool-design": {
+      "effect": 0.992,
+      "n_paired": 120,
+      "with_pass": 1.0,
+      "without_pass": 0.008,
+      "effect_ci95": [
+        0.975,
+        1.008
+      ],
+      "significant": true,
+      "direction": "helps"
+    },
+    "eval-harness": {
+      "effect": -0.1,
+      "n_paired": 60,
+      "with_pass": 0.7,
+      "without_pass": 0.8,
+      "effect_ci95": [
+        -0.236,
+        0.036
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "injection-audit": {
+      "effect": 0.433,
+      "n_paired": 60,
+      "with_pass": 0.883,
+      "without_pass": 0.45,
+      "effect_ci95": [
+        0.292,
+        0.575
+      ],
+      "significant": true,
+      "direction": "helps"
+    },
+    "tool-adversarial-reading": {
+      "effect": 0.0,
+      "n_paired": 60,
+      "with_pass": 1.0,
+      "without_pass": 1.0,
+      "effect_ci95": [
+        0.0,
+        0.0
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "silent-failure-audit": {
+      "effect": -0.033,
+      "n_paired": 60,
+      "with_pass": 0.817,
+      "without_pass": 0.85,
+      "effect_ci95": [
+        -0.172,
+        0.105
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "synthetic-task-generation": {
+      "effect": 0.133,
+      "n_paired": 30,
+      "with_pass": 0.767,
+      "without_pass": 0.633,
+      "effect_ci95": [
+        -0.068,
+        0.334
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "accretion-refactor": {
+      "effect": -0.133,
+      "n_paired": 30,
+      "with_pass": 0.867,
+      "without_pass": 1.0,
+      "effect_ci95": [
+        -0.255,
+        -0.012
+      ],
+      "significant": true,
+      "direction": "HURTS"
+    },
+    "guardrails": {
+      "effect": 0.033,
+      "n_paired": 30,
+      "with_pass": 1.0,
+      "without_pass": 0.967,
+      "effect_ci95": [
+        -0.031,
+        0.098
+      ],
+      "significant": false,
+      "direction": "unclear"
+    }
+  },
+  "eval_false_positive_rate": 0.932,
+  "eval_sensitivity": 0.92,
+  "n_tasks": 43,
+  "runs": 30,
+  "truncated": false,
+  "spend_usd": 2.744,
+  "calls": 3870,
+  "tokens": {
+    "in": 984025,
+    "out": 351991
+  }
+}
