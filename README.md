@@ -1,4 +1,4 @@
-# Agent Skills
+# Agent Skills - Community Loops
 
 > **TL;DR**
 >
