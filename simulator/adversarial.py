@@ -1,0 +1,92 @@
+"""Adversarial resilience sweep against Layer A's simulated commons mechanism.
+
+    python3 -m simulator.adversarial --out simulator/results/adversarial_sweep.json
+
+Tests two structurally different attack vectors, escalating each to find the
+actual breaking point rather than confirming survival at one fixed setting:
+
+  1. Sybil-org scale attack: does the org-jackknife defense (commons.py) hold
+     as the NUMBER of independent sybil orgs grows, not just nodes-per-org?
+  2. Eval blind-spot exploitation: a shared eval blind spot fools honest AND
+     malicious-favoring nodes identically in the same round - the org-jackknife
+     can't detect this because it's not an org-independence problem at all.
+  3. Worst-case combined attack (all vectors at once) crossed with eval quality.
+
+NOTE: this tests the MECHANISM's resilience if a real community existed - it is
+not a measurement of a real community under attack until one actually exists
+and contributes real culture-telemetry (see EXPERIMENTS.md EXP-014/EXP-015).
+Deterministic per --seed. Pure stdlib, no network, no LLM calls.
+"""
+import argparse
+import json
+from typing import Dict, List
+
+from .run import simulate, load_skill_names
+
+
+def _run(skill_names: List[str], seed: int, nodes: int, rounds: int, label: str, **kw) -> Dict:
+    defaults = dict(seed=seed, nodes=nodes, rounds=rounds, malicious_rate=0.0,
+                    optimist_rate=0.0, gamer_rate=0.0, sybil_orgs=0,
+                    eval_key="typical", churn_every=0, hard=False,
+                    skill_names=skill_names)
+    defaults.update(kw)
+    r = simulate(**defaults)
+    return {
+        "label": label, **{k: v for k, v in kw.items() if k != "skill_names"},
+        "precision": r["canon_precision"], "recall": r["canon_recall"],
+        "malicious_established": r["malicious_established"],
+        "n_promoted": r["n_promoted"], "n_truly_good": r["n_truly_good"],
+        "canon_value_strong": r["canon_value_final"][1],
+    }
+
+
+def sweep(skill_names: List[str], seed: int = 7, nodes: int = 100, rounds: int = 60) -> Dict:
+    results = {"sybil_scale": [], "blindspot_exploit": [], "worst_case": []}
+
+    # Sweep 1: sybil-org scale (org-jackknife stress test) at a modest attack.
+    for n_sybil in [0, 1, 2, 3, 4, 6, 8, 12, 16, 24]:
+        results["sybil_scale"].append(_run(
+            skill_names, seed, nodes, rounds, f"sybil={n_sybil}",
+            malicious_rate=0.08, sybil_orgs=n_sybil, eval_key="typical"))
+
+    # Sweep 2: eval quality vs. a fixed MODERATE multi-vector attack - is a
+    # correlated blind spot a cheaper way in than raw sybil volume?
+    for ev in ["strong", "typical", "weak", "blindspotted", "none"]:
+        results["blindspot_exploit"].append(_run(
+            skill_names, seed, nodes, rounds, f"eval={ev}",
+            malicious_rate=0.08, sybil_orgs=2, gamer_rate=0.10,
+            optimist_rate=0.15, eval_key=ev))
+
+    # Sweep 3: worst-case combined attack across eval quality.
+    for ev in ["strong", "typical", "weak", "blindspotted", "none"]:
+        results["worst_case"].append(_run(
+            skill_names, seed, nodes, rounds, f"eval={ev}",
+            malicious_rate=0.20, sybil_orgs=8, gamer_rate=0.25,
+            optimist_rate=0.30, eval_key=ev))
+
+    return results
+
+
+if __name__ == "__main__":
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--seed", type=int, default=7)
+    ap.add_argument("--nodes", type=int, default=100)
+    ap.add_argument("--rounds", type=int, default=60)
+    ap.add_argument("--out", default="", help="write result JSON to this path")
+    args = ap.parse_args()
+
+    names = load_skill_names()
+    results = sweep(names, seed=args.seed, nodes=args.nodes, rounds=args.rounds)
+    print(json.dumps(results, indent=2))
+    if args.out:
+        with open(args.out, "w") as f:
+            json.dump(results, f, indent=2)
+        print(f"\n# wrote {args.out}")
+
+    print(f"\n# seeded from {len(names)} real skills, {args.nodes} nodes, {args.rounds} rounds")
+    print("# sybil_scale: malicious skills blocked (0 established) until sybil_orgs breaks the")
+    print("#   org-jackknife's min_orgs=3 default by sheer volume - see EXPERIMENTS.md EXP-015.")
+    print("# blindspot_exploit: a fixed moderate attack (sybil_orgs=2) that fails against every")
+    print("#   independently-noisy eval succeeds the moment the eval has a CORRELATED blind spot.")
+    print("# worst_case: a well-resourced multi-vector attack that partially defeats even a")
+    print("#   'strong' eval - past some attack size, eval quality stops being the dominant lever.")
