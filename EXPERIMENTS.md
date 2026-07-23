@@ -9,6 +9,29 @@ This ledger tracks empirical measurements, population simulation sweeps, and rou
 
 ---
 
+## Metrics Moved (cumulative, EXP-001 → EXP-012)
+
+The headline deltas across this whole arc — read this before the full table below if you just want to know what actually changed.
+
+| Metric | Before | After |
+|---|---|---|
+| `context-engineering` effect (Haiku) | **-0.341**, significant HURTS (wrong — registrar bug, EXP-005) | **+0.113**, significant HELPS (EXP-009/012) |
+| `context-engineering` effect (Gemini) | **-0.366**, significant HURTS (wrong, EXP-006) | **0.0**, ceiling/neutral (EXP-009/012) |
+| `context-engineering` routing tier | ASK (defensive lockdown, EXP-005/006) | PROPOSE (restored, EXP-009) |
+| Router accuracy | 48.3% (mock keyword-overlap — not a real number, EXP-003) | **91-93%**, real, live, both models (EXP-007/011) |
+| Registrar fixture coverage | 0/43 | **43/43** (EXP-010) |
+| Full-suite real measurement | fragmented across 4 sessions/days, inconsistent registrar state | **1 clean, single-session, `--selfcheck`-gated run**, both models (EXP-011/012) |
+| Canon value (real skills vs. sealed synthetic assumption) | ~0.21-0.33 (what Layer A assumed) | **~1.73** (what real skills actually deliver) — 5-8x higher (EXP-012) |
+| Canon recall (real vs. sealed) | 0.42-1.0, scenario-dependent (sealed) | **1.0, every scenario** (real, EXP-012) |
+| Skill count | 58 | 59 (`verifier-design` added) |
+| `accretion-refactor` (Haiku) | not significant (EXP-008) | **-0.133, significant HURTS** (EXP-012 — flagged, underpowered at n=1 task, not yet acted on) |
+
+The two results worth remembering above the rest: **context-engineering's regression was fake** — the fix flipped it from confirmed-twice-both-models HURTS to confirmed HELPS, and the bug was in the test, not the skill (EXP-009). And **canon value under real data is 5-8x higher than the synthetic model ever assumed** — the simulator was underselling this library's actual skills, not overselling them (EXP-012).
+
+Total real API spend across the whole arc: ~$7.5-8 (against $15 authorized across two budget rounds — $5 for EXP-005 through EXP-010, $10 for EXP-011/012).
+
+---
+
 ## Executive Summary Table
 
 | Exp ID | Date | Target / Hypothesis | Model | Sample Size | Headline Result | Status / Verdict |
