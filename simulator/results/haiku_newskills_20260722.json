@@ -1,0 +1,77 @@
+{
+  "model": "haiku",
+  "mode": "real",
+  "skill_effects": {
+    "tool-adversarial-reading": {
+      "effect": 0.0,
+      "n_paired": 80,
+      "with_pass": 1.0,
+      "without_pass": 1.0,
+      "effect_ci95": [
+        0.0,
+        0.0
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "silent-failure-audit": {
+      "effect": 0.0,
+      "n_paired": 80,
+      "with_pass": 0.875,
+      "without_pass": 0.875,
+      "effect_ci95": [
+        -0.11,
+        0.11
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "synthetic-task-generation": {
+      "effect": 0.1,
+      "n_paired": 40,
+      "with_pass": 0.675,
+      "without_pass": 0.575,
+      "effect_ci95": [
+        -0.106,
+        0.306
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "accretion-refactor": {
+      "effect": -0.075,
+      "n_paired": 40,
+      "with_pass": 0.9,
+      "without_pass": 0.975,
+      "effect_ci95": [
+        -0.182,
+        0.032
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "guardrails": {
+      "effect": 0.125,
+      "n_paired": 40,
+      "with_pass": 1.0,
+      "without_pass": 0.875,
+      "effect_ci95": [
+        0.023,
+        0.227
+      ],
+      "significant": true,
+      "direction": "helps"
+    }
+  },
+  "eval_false_positive_rate": 1.0,
+  "eval_sensitivity": 0.862,
+  "n_tasks": 7,
+  "runs": 40,
+  "truncated": false,
+  "spend_usd": 1.2165,
+  "calls": 840,
+  "tokens": {
+    "in": 164097,
+    "out": 210489
+  }
+}

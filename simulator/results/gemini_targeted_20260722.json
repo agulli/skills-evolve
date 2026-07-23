@@ -1,0 +1,53 @@
+{
+  "model": "gemini",
+  "mode": "real",
+  "skill_effects": {
+    "context-engineering": {
+      "effect": -0.366,
+      "n_paired": 320,
+      "with_pass": 0.347,
+      "without_pass": 0.713,
+      "effect_ci95": [
+        -0.42,
+        -0.311
+      ],
+      "significant": true,
+      "direction": "HURTS"
+    },
+    "prompt-architecture": {
+      "effect": 0.004,
+      "n_paired": 240,
+      "with_pass": 0.996,
+      "without_pass": 0.992,
+      "effect_ci95": [
+        -0.01,
+        0.018
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "injection-audit": {
+      "effect": 0.35,
+      "n_paired": 80,
+      "with_pass": 0.75,
+      "without_pass": 0.4,
+      "effect_ci95": [
+        0.215,
+        0.485
+      ],
+      "significant": true,
+      "direction": "helps"
+    }
+  },
+  "eval_false_positive_rate": 0.978,
+  "eval_sensitivity": 0.802,
+  "n_tasks": 16,
+  "runs": 40,
+  "truncated": false,
+  "spend_usd": 0.0848,
+  "calls": 1920,
+  "tokens": {
+    "in": 667695,
+    "out": 45045
+  }
+}

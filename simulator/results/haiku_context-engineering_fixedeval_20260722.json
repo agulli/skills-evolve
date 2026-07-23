@@ -1,0 +1,29 @@
+{
+  "model": "haiku",
+  "mode": "real",
+  "skill_effects": {
+    "context-engineering": {
+      "effect": 0.106,
+      "n_paired": 320,
+      "with_pass": 0.931,
+      "without_pass": 0.825,
+      "effect_ci95": [
+        0.069,
+        0.143
+      ],
+      "significant": true,
+      "direction": "helps"
+    }
+  },
+  "eval_false_positive_rate": 0.136,
+  "eval_sensitivity": 1.0,
+  "n_tasks": 8,
+  "runs": 40,
+  "truncated": false,
+  "spend_usd": 0.7838,
+  "calls": 903,
+  "tokens": {
+    "in": 727252,
+    "out": 11312
+  }
+}

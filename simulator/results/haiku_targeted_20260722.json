@@ -1,0 +1,53 @@
+{
+  "model": "haiku",
+  "mode": "real",
+  "skill_effects": {
+    "context-engineering": {
+      "effect": -0.341,
+      "n_paired": 320,
+      "with_pass": 0.047,
+      "without_pass": 0.388,
+      "effect_ci95": [
+        -0.393,
+        -0.289
+      ],
+      "significant": true,
+      "direction": "HURTS"
+    },
+    "prompt-architecture": {
+      "effect": 0.129,
+      "n_paired": 240,
+      "with_pass": 0.971,
+      "without_pass": 0.842,
+      "effect_ci95": [
+        0.081,
+        0.177
+      ],
+      "significant": true,
+      "direction": "helps"
+    },
+    "injection-audit": {
+      "effect": 0.212,
+      "n_paired": 80,
+      "with_pass": 0.725,
+      "without_pass": 0.512,
+      "effect_ci95": [
+        0.067,
+        0.358
+      ],
+      "significant": true,
+      "direction": "helps"
+    }
+  },
+  "eval_false_positive_rate": 0.982,
+  "eval_sensitivity": 0.683,
+  "n_tasks": 16,
+  "runs": 40,
+  "truncated": false,
+  "spend_usd": 1.4646,
+  "calls": 1920,
+  "tokens": {
+    "in": 881885,
+    "out": 116539
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "model": "gemini",
+  "mode": "real",
+  "skill_effects": {
+    "context-engineering": {
+      "effect": 0.0,
+      "n_paired": 320,
+      "with_pass": 1.0,
+      "without_pass": 1.0,
+      "effect_ci95": [
+        0.0,
+        0.0
+      ],
+      "significant": false,
+      "direction": "unclear"
+    }
+  },
+  "eval_false_positive_rate": 0.0,
+  "eval_sensitivity": 1.0,
+  "n_tasks": 8,
+  "runs": 40,
+  "truncated": false,
+  "spend_usd": 0.0651,
+  "calls": 960,
+  "tokens": {
+    "in": 594721,
+    "out": 14094
+  }
+}

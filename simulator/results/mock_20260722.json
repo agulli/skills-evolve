@@ -1,0 +1,180 @@
+{
+  "model": "mock",
+  "mode": "mock",
+  "skill_effects": {
+    "secrets-management": {
+      "effect": 0.05,
+      "n_paired": 40,
+      "with_pass": 0.5,
+      "without_pass": 0.45,
+      "effect_ci95": [
+        -0.169,
+        0.269
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "context-engineering": {
+      "effect": 0.25,
+      "n_paired": 40,
+      "with_pass": 0.6,
+      "without_pass": 0.35,
+      "effect_ci95": [
+        0.045,
+        0.455
+      ],
+      "significant": true,
+      "direction": "helps"
+    },
+    "prompt-architecture": {
+      "effect": -0.1,
+      "n_paired": 30,
+      "with_pass": 0.467,
+      "without_pass": 0.567,
+      "effect_ci95": [
+        -0.333,
+        0.133
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "grounding-citation": {
+      "effect": 0.233,
+      "n_paired": 30,
+      "with_pass": 0.6,
+      "without_pass": 0.367,
+      "effect_ci95": [
+        -0.039,
+        0.506
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "tool-design": {
+      "effect": 0.3,
+      "n_paired": 20,
+      "with_pass": 0.7,
+      "without_pass": 0.4,
+      "effect_ci95": [
+        -0.013,
+        0.613
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "eval-harness": {
+      "effect": 0.1,
+      "n_paired": 10,
+      "with_pass": 0.5,
+      "without_pass": 0.4,
+      "effect_ci95": [
+        -0.415,
+        0.615
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "injection-audit": {
+      "effect": 0.3,
+      "n_paired": 10,
+      "with_pass": 0.6,
+      "without_pass": 0.3,
+      "effect_ci95": [
+        -0.097,
+        0.697
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "tool-adversarial-reading": {
+      "effect": 0.1,
+      "n_paired": 10,
+      "with_pass": 0.6,
+      "without_pass": 0.5,
+      "effect_ci95": [
+        -0.234,
+        0.434
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "silent-failure-audit": {
+      "effect": 0.1,
+      "n_paired": 10,
+      "with_pass": 0.5,
+      "without_pass": 0.4,
+      "effect_ci95": [
+        -0.415,
+        0.615
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "synthetic-task-generation": {
+      "effect": -0.2,
+      "n_paired": 5,
+      "with_pass": 0.4,
+      "without_pass": 0.6,
+      "effect_ci95": [
+        -0.856,
+        0.456
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "accretion-refactor": {
+      "effect": 0.4,
+      "n_paired": 5,
+      "with_pass": 0.6,
+      "without_pass": 0.2,
+      "effect_ci95": [
+        -0.301,
+        1.101
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "guardrails": {
+      "effect": 0.2,
+      "n_paired": 5,
+      "with_pass": 0.2,
+      "without_pass": 0.0,
+      "effect_ci95": [
+        -0.151,
+        0.551
+      ],
+      "significant": false,
+      "direction": "unclear"
+    }
+  },
+  "eval_false_positive_rate": 0.299,
+  "eval_sensitivity": 0.949,
+  "n_tasks": 43,
+  "runs": 5,
+  "truncated": false,
+  "spend_usd": 0.0,
+  "calls": 0,
+  "tokens": {
+    "in": 0,
+    "out": 0
+  }
+}
+
+# 43 tasks (5 runs each) across 12 skills.
+# `significant` per skill = CI-excludes-zero. False → not enough tasks/runs yet
+#   (target ~8-15 tasks/skill). Current per-skill task counts:
+#     secrets-management     8 tasks
+#     context-engineering    8 tasks
+#     prompt-architecture    6 tasks
+#     grounding-citation     6 tasks
+#     tool-design            4 tasks
+#     eval-harness           2 tasks
+#     injection-audit        2 tasks
+#     tool-adversarial-reading 2 tasks
+#     silent-failure-audit   2 tasks
+#     synthetic-task-generation 1 tasks
+#     accretion-refactor     1 tasks
+#     guardrails             1 tasks
+# H1: skill_effects.effect feeds World.build. H2: eval_false_positive_rate
+#     is (1 - specificity); a value that REPEATS across haiku AND gemini is a
+#     cross-model blind spot — the H2 failure the population sim then propagates.

@@ -1,0 +1,13 @@
+# Secrets — never commit real keys. This repo sits inside a tracked parent repo,
+# so an unignored .env would be at risk of being committed.
+.env
+*.env
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Simulator scratch output
+/simulator/*.json
+/tmp/

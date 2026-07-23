@@ -1,0 +1,9 @@
+=== HAIKU start 19:51:54 ===
+# H1: skill_effects.effect feeds World.build. H2: eval_false_positive_rate
+#     is (1 - specificity); a value that REPEATS across haiku AND gemini is a
+#     cross-model blind spot — the H2 failure the population sim then propagates.
+=== GEMINI start 21:35:02 ===
+# H1: skill_effects.effect feeds World.build. H2: eval_false_positive_rate
+#     is (1 - specificity); a value that REPEATS across haiku AND gemini is a
+#     cross-model blind spot — the H2 failure the population sim then propagates.
+=== DONE 22:15:03 ===
