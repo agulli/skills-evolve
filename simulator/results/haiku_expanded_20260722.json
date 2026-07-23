@@ -1,0 +1,41 @@
+{
+  "model": "haiku",
+  "mode": "real",
+  "skill_effects": {
+    "tool-adversarial-reading": {
+      "effect": 0.039,
+      "n_paired": 180,
+      "with_pass": 1.0,
+      "without_pass": 0.961,
+      "effect_ci95": [
+        0.011,
+        0.067
+      ],
+      "significant": true,
+      "direction": "helps"
+    },
+    "accretion-refactor": {
+      "effect": -0.013,
+      "n_paired": 150,
+      "with_pass": 0.973,
+      "without_pass": 0.987,
+      "effect_ci95": [
+        -0.045,
+        0.019
+      ],
+      "significant": false,
+      "direction": "unclear"
+    }
+  },
+  "eval_false_positive_rate": 1.0,
+  "eval_sensitivity": 0.908,
+  "n_tasks": 11,
+  "runs": 30,
+  "truncated": false,
+  "spend_usd": 0.6288,
+  "calls": 990,
+  "tokens": {
+    "in": 122538,
+    "out": 101253
+  }
+}
