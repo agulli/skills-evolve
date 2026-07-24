@@ -4,7 +4,7 @@
 >
 > **Why this exists.** Agent engineering knowledge today is *folklore* — prompt tricks and topology tips that live in people's heads and blog posts, spread by imitation rather than evidence, and silently stale the moment a new model ships. Every team re-derives the same lessons; hard-won practice evaporates at the end of a session; and a skill sitting in a folder nobody remembers to invoke is shelfware. This library closes that loop end to end, five parts working together: **skills** capture production-grade agent practice as checkable procedures ([the "What"](docs/skills_doc.md)); a **router** fires the right one at the right moment without being asked ([the "When"](docs/routing_doc.md)); an **eval gate** proves a skill actually helps, on real tasks, before it ships or stays ([the "Gate"](docs/evals_doc.md)); **local evolution** turns your own routing logs and eval results into gated fixes for your own skills ([the "Engine"](docs/evolve_doc.md)); and **community evolution** validates what works across everyone's model generation from anonymized aggregates alone — no prompt, trace, or implementation ever leaves your machine ([the "Commons"](docs/telemetry_doc.md)).
 >
-> **What it is.** **59 vendor-neutral `SKILL.md` skills for building and operating AI agents**, spanning the whole lifecycle (`design · build · safety · eval · ops · evolve · dev`). Run `./install.sh` (or point any agent at [INSTALL.md](INSTALL.md) and say "install this"); works in any tool that reads a skills directory — Claude Code, Antigravity, Codex, Gemini CLI, Cursor, Grok, and 30+ more.
+> **What it is.** **60 vendor-neutral `SKILL.md` skills for building and operating AI agents**, spanning the whole lifecycle (`design · build · safety · eval · ops · evolve · dev`). Run `./install.sh` (or point any agent at [INSTALL.md](INSTALL.md) and say "install this"); works in any tool that reads a skills directory — Claude Code, Antigravity, Codex, Gemini CLI, Cursor, Grok, and 30+ more.
 >
 > **What makes it different.** It's **self-driving** — a router ([ROUTING.md](skills/ROUTING.md)) fires the right skill from what you're actually doing, with AUTO / PROPOSE / ASK tiers so you keep control instead of memorizing dozens of commands. It's **checked** — skills are measured against real held-out tasks, not assumed to help; a skill that regresses gets caught and gated, not shipped on faith. And it **learns**, at two scopes — locally, every routing decision is logged and mistakes become gated fixes to your own `ROUTING.md`/skills; and communally, (on by default, fully anonymized) daily aggregates feed a public commons of what actually works, per model generation ([telemetry_doc.md](docs/telemetry_doc.md)). Per-skill reference: [skills_doc.md](docs/skills_doc.md).
 
@@ -15,14 +15,14 @@ Skills are organized by **lifecycle stage** — the moment in work when you reac
 | Group | Stage | Skills |
 |-------|-------|--------|
 | `skills/design/` | Before code exists | requirements-interrogation, agent-architecture, prompt-architecture, tool-design, handoff-protocol |
-| `skills/build/` | While writing the agent | skill-authoring, mcp-server, memory-design, context-engineering, retrieval-design, state-management, grounding-citation, multimodal |
+| `skills/build/` | While writing the agent | skill-authoring, mcp-server, memory-design, context-engineering, context-degradation, retrieval-design, state-management, grounding-citation, multimodal |
 | `skills/safety/` | Before anything touches prod | guardrails, injection-audit, sandbox-policy, privacy, secrets-management, agent-identity, supply-chain-vetting, output-safety, compliance-mapping |
 | `skills/eval/` | Is it actually good? | adversarial-review, eval-harness, verifier-design, trajectory-review, llm-judge, model-card, silent-failure-audit, synthetic-task-generation |
 | `skills/ops/` | Running in production | agent-observability, cost-optimization, agent-incident, human-review-escalation, reliability-engineering, deployment, model-migration, latency-optimization, model-routing, cost-governance |
 | `skills/evolve/` | Self-evolving agents | self-improvement-loop, skill-distillation, feedback-harvesting, routing-tuner, culture-telemetry, skill-maintenance, evolution-scan, evolution-canary, evolution-propagate, evolution-conflict, evolution-meta |
 | `skills/dev/` | Developer inner loop | agent-scaffolding, local-replay, prompt-experimentation, agent-code-review, testing-ergonomics, codebase-onboarding |
 
-**59 skills across 7 lifecycle groups.**
+**60 skills across 7 lifecycle groups.**
 
 ## System Architecture & Documentation
 
@@ -30,7 +30,7 @@ This library is a closed-loop system for agentic software engineering — five p
 
 ```mermaid
 graph LR
-    A["Skills<br/><b>The What</b><br/>59 SKILL.md files<br/>design·build·safety·eval·ops·evolve·dev"] --> B["Router<br/><b>The When</b><br/>ROUTING.md<br/>AUTO / PROPOSE / ASK"]
+    A["Skills<br/><b>The What</b><br/>60 SKILL.md files<br/>design·build·safety·eval·ops·evolve·dev"] --> B["Router<br/><b>The When</b><br/>ROUTING.md<br/>AUTO / PROPOSE / ASK"]
     B --> C["Eval Gate<br/><b>The Gate</b><br/>eval-harness · verifier-design<br/>llm-judge · silent-failure-audit"]
     C --> D["Local Evolution<br/><b>The Engine</b><br/>evolution-scan/canary/propagate<br/>routing-tuner · skill-distillation"]
     D --> E["Community Evolution<br/><b>The Commons</b><br/>culture-telemetry<br/>anonymized aggregates only"]
@@ -42,7 +42,7 @@ graph LR
 The core documentation has been split into a dedicated multi-part guide that details each component in depth:
 
 *   **[Documentation Index](docs/intro.md)**: A high-level overview.
-*   **[The Skills Catalog (The "What")](docs/skills_doc.md)**: A thin, generated index of all 59 skills — each self-documents in its own `SKILL.md`.
+*   **[The Skills Catalog (The "What")](docs/skills_doc.md)**: A thin, generated index of all 60 skills — each self-documents in its own `SKILL.md`.
 *   **[Skill Routing (The "When")](docs/routing_doc.md)**: How the router triggers skills autonomously based on behavior.
 *   **[Evaluation Mechanism (The "Gate")](docs/evals_doc.md)**: How numeric gates ensure changes actually improve the agent.
 *   **[Evolution Mechanism (The "Engine")](docs/evolve_doc.md)**: How the agent learns from routing logs and telemetry to self-improve over time.

@@ -5,7 +5,7 @@ This library is a closed-loop system for agentic software engineering. Agent eng
 The system operates across a set of interconnected mechanisms. The documentation is split into the following core parts to explain each component in depth:
 
 ### 1. [The Skills Catalog](skills_doc.md)
-The **"What"**. A thin, generated index of the 59 procedural markdown files that guide the agent's behavior — each skill self-documents in its own `SKILL.md` (the single source of truth). These turn tribal knowledge and best practices into executable instructions.
+The **"What"**. A thin, generated index of the 60 procedural markdown files that guide the agent's behavior — each skill self-documents in its own `SKILL.md` (the single source of truth). These turn tribal knowledge and best practices into executable instructions.
 
 ### 2. [Skill Routing](routing_doc.md)
 The **"When"**. How the library becomes self-driving. Explains the always-loaded router table that maps observable user behaviors to specific skills, using autonomy tiers to keep you in control without needing to memorize commands.

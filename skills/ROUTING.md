@@ -32,6 +32,7 @@ You have an agent-engineering skill library. Do not wait to be asked: match the 
 | builds or wraps an MCP server | `mcp-server` | AUTO |
 | needs the agent to remember things across sessions, or memory is stale/unbounded | `memory-design` | PROPOSE |
 | long-horizon run where context truncates/degrades or token cost climbs with length | `context-engineering` | PROPOSE (restored 2026-07-22 — the EXP-005/006 HURTS finding was a broken eval registrar, not a real skill defect; corrected measurement in EXP-009 shows significant HELPS on Haiku, neutral/ceiling on Gemini) |
+| agent ignores instructions that ARE in context, a wrong fact persists across corrections, or constraints bleed between tasks in one window | `context-degradation` | AUTO — diagnostic, read-only |
 | builds RAG / a knowledge agent, or retrieved context is irrelevant/bloated | `retrieval-design` | PROPOSE |
 | agent answers from documents but states facts without sources / may hallucinate | `grounding-citation` | PROPOSE |
 | agent runs long/resumable, must survive restarts, or pauses for human input | `state-management` | PROPOSE |

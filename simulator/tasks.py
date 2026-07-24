@@ -231,6 +231,26 @@ def load_tasks() -> List[Task]:
             f"{filler}\nCRITICAL: {fact}.\n{filler}",
             _fact_survives_and_shorter(fact, cap), base=0.5, eff=0.2)
 
+    # ---- context-degradation: diagnose the failure mode, don't just "compact" ----
+    CD = ("SKILL context-degradation: five distinct context failure modes - lost-in-middle "
+          "(mid-context content ignored; fix: move to edges), poisoning (wrong fact entered "
+          "via tool/retrieval and persists; fix: truncate to before entry, never compact "
+          "across it), distraction (irrelevant-but-correct content), confusion (task bleed), "
+          "clash (contradictory sources; fix: precedence). Diagnose the mode first; "
+          "compaction spreads poisoning.")
+    add("context-degrade-0", "codegen", "context-degradation", CD,
+        "An agent keeps repeating that the deploy region is eu-west-1 even after the user "
+        "corrected it twice; the wrong value first appeared in a tool output on turn 4. "
+        "Name the failure mode and the fix.",
+        _mentions_any("poison", "truncate", "before", "entry", "rebuild", "turn 4"),
+        base=0.35, eff=0.25)
+    add("context-degrade-1", "codegen", "context-degradation", CD,
+        "An instruction sitting in the middle of a very long context is ignored, but the "
+        "same instruction works when placed at the start. Name the failure mode and the fix.",
+        _mentions_any(r"lost.?in.?(the.?)?middle", "u-curve", "edge", "beginning", "start or end",
+                      "reposition", "pin"),
+        base=0.35, eff=0.25)
+
     # ---- prompt-architecture: dedup (3) + contradiction (2) + preserve (1) ----
     PA = ("SKILL prompt-architecture: one instruction, one place; remove duplicates and "
           "contradictions; keep every distinct instruction exactly once.")
@@ -1026,6 +1046,12 @@ FIXTURES: Dict[str, Tuple[str, str]] = {
     "context-5": ("Webhook secret rotates every 30 days.", "Webhook secret rotates every 90 days."),
     "context-6": ("Production model pinned to v2.4.", "Production model pinned to v3.0."),
     "context-7": ("SLA: 99.9% monthly uptime.", "SLA requirements still being finalized."),
+    "context-degrade-0": ("This is context poisoning - truncate the context to before the "
+                          "turn 4 entry point and rebuild with the verified region only.",
+                          "The context is just too long; compact it into a summary."),
+    "context-degrade-1": ("This is lost-in-the-middle - reposition the instruction to the "
+                          "start or end of the window, since attention follows a U-curve.",
+                          "The model needs the instruction repeated more forcefully."),
 
     # prompt-architecture: good = duplicate removed / contradiction resolved
     # / constraint kept; bad = original unfixed prompt (or fact dropped).

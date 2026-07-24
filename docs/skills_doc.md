@@ -6,7 +6,7 @@
 > cannot drift. Routing lives in [`skills/ROUTING.md`](../skills/ROUTING.md); the
 > telemetry spec in [telemetry_doc.md](telemetry_doc.md).
 
-**59 skills across 7 lifecycle groups.** Follow any link for the full
+**60 skills across 7 lifecycle groups.** Follow any link for the full
 procedure, when-to/when-not boundaries, output contract, and checklist.
 
 ## `design/` — Before code exists
@@ -20,6 +20,7 @@ procedure, when-to/when-not boundaries, output contract, and checklist.
 
 ## `build/` — While writing the agent
 
+- **[context-degradation](../skills/build/context-degradation/SKILL.md)** — Diagnose which context failure mode is degrading a long-running agent — lost-in-middle, poisoning, distraction, confusion, or clash — before reaching for a fix.
 - **[context-engineering](../skills/build/context-engineering/SKILL.md)** — Engineer what occupies an agent's context window over a long run — token budgeting, compaction, summarization cadence, eviction policy, and result trimming — so it stays coherent and affordable across many turns.
 - **[grounding-citation](../skills/build/grounding-citation/SKILL.md)** — Make an agent ground its claims in retrieved evidence and cite sources — verify quotes, attribute statements, and refuse or flag when unsupported — so answers are checkable and hallucinations are caught.
 - **[mcp-server](../skills/build/mcp-server/SKILL.md)** — Scaffold, review, or debug an MCP server — transport choice, tool surface, auth, and packaging so agents can consume it.
