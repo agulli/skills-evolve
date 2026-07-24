@@ -719,8 +719,13 @@ def load_tasks() -> List[Task]:
     add("verifier-design-1", "eval", "verifier-design", VD,
         "An eval shows a large, surprising HURTS result right after a one-line change. "
         "What do you check first, before trusting it?",
+        # EXP-019 investigation: "check the pass/fail logic itself / did the
+        # verifier change" is a fully correct answer in the model's own
+        # vocabulary - the original list only recognized OUR internal terms
+        # (fixture/transcript/raw completion).
         _mentions_any("raw completion", "read", "fixture", r"should.?pass", r"should.?fail",
-                      "transcript"), base=0.35, eff=0.22)
+                      "transcript", r"pass.?/?.?fail logic", "verifier (definition|itself|change)",
+                      "the (check|eval|test) itself", "grading"), base=0.35, eff=0.22)
 
     # ---- evolve/ ----
     CT = "SKILL culture-telemetry: emit anonymized, signed usage statistics daily to a shared commons - no prompt, trace, or implementation ever leaves the node."
