@@ -14,12 +14,12 @@ Skills are organized by **lifecycle stage** — the moment in work when you reac
 
 | Group | Stage | Skills |
 |-------|-------|--------|
-| `skills/design/` | Before code exists | requirements-interrogation, agent-architecture, long-horizon-brief, prompt-architecture, tool-design, handoff-protocol |
+| `skills/design/` | Before code exists | requirements-interrogation, agent-architecture, long-horizon-brief, prompt-architecture, tool-design, tool-adversarial-reading, handoff-protocol |
 | `skills/build/` | While writing the agent | skill-authoring, mcp-server, memory-design, context-engineering, context-degradation, retrieval-design, state-management, grounding-citation, multimodal |
 | `skills/safety/` | Before anything touches prod | guardrails, injection-audit, sandbox-policy, privacy, secrets-management, agent-identity, supply-chain-vetting, output-safety, compliance-mapping |
 | `skills/eval/` | Is it actually good? | adversarial-review, eval-harness, verifier-design, trajectory-review, llm-judge, model-card, silent-failure-audit, synthetic-task-generation |
 | `skills/ops/` | Running in production | agent-observability, cost-optimization, agent-incident, human-review-escalation, reliability-engineering, deployment, model-migration, latency-optimization, model-routing, cost-governance |
-| `skills/evolve/` | Self-evolving agents | self-improvement-loop, skill-distillation, feedback-harvesting, routing-tuner, culture-telemetry, skill-maintenance, evolution-scan, evolution-canary, evolution-propagate, evolution-conflict, evolution-meta |
+| `skills/evolve/` | Self-evolving agents | self-improvement-loop, skill-distillation, feedback-harvesting, routing-tuner, culture-telemetry, skill-maintenance, accretion-refactor, evolution-scan, evolution-canary, evolution-propagate, evolution-conflict, evolution-meta |
 | `skills/dev/` | Developer inner loop | agent-scaffolding, local-replay, prompt-experimentation, agent-code-review, testing-ergonomics, codebase-onboarding |
 
 **61 skills across 7 lifecycle groups.**
