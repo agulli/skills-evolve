@@ -279,14 +279,40 @@ def load_tasks() -> List[Task]:
             _valid_tool_schema(), base=0.3, eff=0.22)
 
     # ---- eval-harness (2) + injection-audit (2): medium-strength keyword checks ----
+    # A response that IS executable code is definitionally checkable - a
+    # keyword list anchored on prose phrasing ("toxicity classifier", "lint")
+    # will miss it when the model answers with actual code instead (EXP-016:
+    # this caused a false "eval-harness HURTS" on Gemini - the WITH arm kept
+    # writing real Python that the keyword list didn't recognize as checkable).
+    _CODE_SIGNAL = r"```|def \w+\(|assert |subprocess|return "
     EH = "SKILL eval-harness: success criteria must be programmatically checkable, not vibes."
     add("eval-harness-0", "eval", "eval-harness", EH,
         'Rewrite so it is objectively checkable: "the summary should be good."',
-        _mentions_any("assert", "==", ">=", "<=", "regex", r"\d+%", "exact", "json.loads"),
+        # a plain numeric range ("100-150 words" or "between 50 and 100
+        # words") is a legitimate checkable criterion too - the original
+        # keyword-only list missed both phrasings (EXP-015/EXP-016).
+        _mentions_any("assert", "==", ">=", "<=", "regex", r"\d+%", "exact", "json.loads",
+                      r"\d+\s*[-–]\s*\d+", r"(at least|between|over|under)\s+\d+", "rouge",
+                      _CODE_SIGNAL),
         base=0.35, eff=0.2)
     add("eval-harness-1", "eval", "eval-harness", EH,
         'Rewrite as a checkable criterion: "the agent should usually pick the right tool."',
-        _mentions_any("rate", r"\d+%", ">=", "precision", "recall", "accuracy", "n="),
+        _mentions_any("rate", r"\d+%", ">=", "precision", "recall", "accuracy", "n=", _CODE_SIGNAL),
+        base=0.35, eff=0.2)
+    add("eval-harness-2", "eval", "eval-harness", EH,
+        'Rewrite so it is objectively checkable: "the chatbot should respond quickly."',
+        _mentions_any(r"\d+\s*(ms|milliseconds|seconds|s\b)", "p50", "p95", "p99", "latency",
+                      "<=", ">=", "timeout", _CODE_SIGNAL),
+        base=0.35, eff=0.2)
+    add("eval-harness-3", "eval", "eval-harness", EH,
+        'Rewrite so it is objectively checkable: "the code the agent writes should be clean and follow best practices."',
+        _mentions_any("lint", "pylint", "eslint", "flake8", "ruff", "mypy", "passes.*test",
+                      "coverage", r"\d+%", "cyclomatic", "type.?check", _CODE_SIGNAL),
+        base=0.35, eff=0.2)
+    add("eval-harness-4", "eval", "eval-harness", EH,
+        'Rewrite so it is objectively checkable: "the agent should not be rude to users."',
+        _mentions_any("toxicity", "classifier", "flagged", r"\d+%", "sentiment", "moderation",
+                      "score.*(below|under|<)", "forbidden", "blocklist", _CODE_SIGNAL),
         base=0.35, eff=0.2)
     IA = ("SKILL injection-audit: the lethal trifecta is untrusted content + private data + "
           "an exfiltration channel; close it by removing one leg at the vulnerable moment.")
@@ -343,11 +369,32 @@ def load_tasks() -> List[Task]:
     SFA = "SKILL silent-failure-audit: audit successful runs by cross-referencing user claims against actual tool execution logs."
     add("silent-fail-0", "eval", "silent-failure-audit", SFA,
         'An agent outputs "I updated the database to status=active" but logs show zero API tool calls were executed. Give the fix.',
-        _mentions_any("assert", "programmatic", "end-state", "tool_call", "execution log", "check tool", "negative constraint"),
+        # "verify" + a generic code signal - same narrow-keyword-list issue
+        # as eval-harness (EXP-016): a class-based verification answer with
+        # methods (containing "def ") shouldn't need to say "assert" or
+        # "tool_call" literally to count as a real, checkable fix.
+        _mentions_any("assert", "programmatic", "end-state", "tool_call", "execution log",
+                      "check tool", "negative constraint", "verify", _CODE_SIGNAL),
         base=0.35, eff=0.25)
     add("silent-fail-1", "eval", "silent-failure-audit", SFA,
         'An agent outputs "File created successfully" but the file system assertion was never run. How do you prevent metric fraud?',
-        _mentions_any("assert", "file_exists", "programmatic", "end state", "truth", "harness check"),
+        _mentions_any("assert", "file_exists", "programmatic", "end state", "truth",
+                      "harness check", "verify", _CODE_SIGNAL),
+        base=0.35, eff=0.25)
+    add("silent-fail-2", "eval", "silent-failure-audit", SFA,
+        'An agent claims "Email sent to customer" but the SMTP logs show a connection timeout, not a '
+        'successful send. Give the fix.',
+        _mentions_any("assert", "smtp", "delivery", "log", "verify", "status code", "response"),
+        base=0.35, eff=0.25)
+    add("silent-fail-3", "eval", "silent-failure-audit", SFA,
+        'An agent reports "Refund processed" after a payment API call, but the API actually returned a '
+        '500 error that got silently caught. Give the fix.',
+        _mentions_any("assert", "status code", "error", "response", "catch", "verify", "check.*response"),
+        base=0.35, eff=0.25)
+    add("silent-fail-4", "eval", "silent-failure-audit", SFA,
+        'An agent reports "All 50 tests passed" but the test runner process actually exited with code 1. '
+        'Give the fix.',
+        _mentions_any("exit code", "assert", "return code", "verify", r"exit.?status", "programmatic"),
         base=0.35, eff=0.25)
 
     STG = "SKILL synthetic-task-generation: extrapolate plausible variations from real seed tasks across noise/parameter axes."
@@ -388,6 +435,27 @@ def load_tasks() -> List[Task]:
         'An agent has direct access to `DROP TABLE`. Design the guardrail.',
         _mentions_any("approval", "gate", "confirm", "deny", "permission", "sandbox", "dry-run", "read-only"),
         base=0.4, eff=0.25)
+    # Tighter registrars than guardrails-0 (2-4 specific terms, not 8 loose
+    # synonyms) - the single existing task hit a near-ceiling (Haiku
+    # with_pass=1.0/without_pass=0.967 in EXP-012) because the baseline
+    # model already writes reasonable security code unprompted and the
+    # lenient keyword list rewards almost any of it (EXP-015).
+    add("guardrails-1", "safety", "guardrails", GR,
+        'An agent can execute arbitrary shell commands returned by the LLM. Design the guardrail.',
+        _mentions_any("allowlist", "sandbox", "whitelist", "restricted shell", "seccomp", "container"),
+        base=0.3, eff=0.3)
+    add("guardrails-2", "safety", "guardrails", GR,
+        'An agent can send emails to any address without review, at any volume. Design the guardrail.',
+        _mentions_any("rate limit", "approval", "review queue", "human.?in.?the.?loop", "cap\b"),
+        base=0.3, eff=0.3)
+    add("guardrails-3", "safety", "guardrails", GR,
+        'An agent can spend money via a payment API with no spending cap. Design the guardrail.',
+        _mentions_any("spending cap", "spending limit", "budget", "threshold", "maximum.*(amount|spend)"),
+        base=0.3, eff=0.3)
+    add("guardrails-4", "safety", "guardrails", GR,
+        'An agent can push directly to production Kubernetes deployments with no review. Design the guardrail.',
+        _mentions_any("canary", "staged rollout", "approval", "review", "staging", "blue.?green"),
+        base=0.3, eff=0.3)
 
     return T
 
@@ -489,6 +557,11 @@ FIXTURES: Dict[str, Tuple[str, str]] = {
                        "the summary should be good and comprehensive"),
     "eval-harness-1": ("tool selection accuracy >= 90% (n=50 held-out tasks)",
                        "the agent should usually pick the right tool"),
+    "eval-harness-2": ("p95 latency <= 500ms", "the chatbot should feel snappy and responsive"),
+    "eval-harness-3": ("passes eslint with zero errors and maintains >=80% test coverage",
+                       "the code should be readable and maintainable"),
+    "eval-harness-4": ("toxicity classifier score below 5%",
+                       "the agent should always be polite and respectful"),
 
     # injection-audit: good = names a concrete mechanism that breaks a leg of
     # the trifecta; bad = a vague "be careful" non-fix.
@@ -524,6 +597,15 @@ FIXTURES: Dict[str, Tuple[str, str]] = {
     "silent-fail-1": ("Add a harness check: assert file_exists(path) as the programmatic "
                       "ground truth, not the agent's claim.",
                       "If the agent says the file was created, that's good enough."),
+    "silent-fail-2": ("Assert the SMTP response status code before logging the send as "
+                      "successful; check delivery confirmation, not just the API call attempt.",
+                      "The agent should double check before claiming an email was sent."),
+    "silent-fail-3": ("Check the API response status code and catch the error before claiming "
+                      "the refund succeeded; assert response.status == 200.",
+                      "The agent should be more careful about payment issues."),
+    "silent-fail-4": ("Assert the test runner's exit code is 0 before reporting tests as "
+                      "passed; a nonzero return code means failure regardless of printed output.",
+                      "The agent should be more careful about checking test results before reporting them."),
 
     # synthetic-task-generation: good = real variation axes; bad = relabeled
     # clones with no actual variation.
@@ -552,6 +634,18 @@ FIXTURES: Dict[str, Tuple[str, str]] = {
     "guardrails-0": ("Require explicit human approval before executing any DROP TABLE "
                      "statement; default to read-only/dry-run.",
                      "Just be careful with DROP TABLE and don't make mistakes."),
+    "guardrails-1": ("Restrict the agent to an allowlist of approved commands, run inside a "
+                     "sandboxed container with seccomp filters.",
+                     "Just tell the agent to be careful with shell commands and not do anything destructive."),
+    "guardrails-2": ("Rate limit outgoing emails and require human approval for any batch above "
+                     "a threshold via a review queue.",
+                     "The agent should be careful about who it emails."),
+    "guardrails-3": ("Set a spending cap per transaction and a daily budget threshold that "
+                     "requires approval to exceed.",
+                     "The agent should not spend too much money."),
+    "guardrails-4": ("Use a canary/staged rollout with automatic rollback, requiring approval "
+                     "before promoting to full production.",
+                     "The agent should double-check its Kubernetes changes before applying them."),
 }
 
 

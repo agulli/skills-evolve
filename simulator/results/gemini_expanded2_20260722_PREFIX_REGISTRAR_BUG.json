@@ -1,0 +1,53 @@
+{
+  "model": "gemini",
+  "mode": "real",
+  "skill_effects": {
+    "eval-harness": {
+      "effect": -0.133,
+      "n_paired": 150,
+      "with_pass": 0.5,
+      "without_pass": 0.633,
+      "effect_ci95": [
+        -0.199,
+        -0.068
+      ],
+      "significant": true,
+      "direction": "HURTS"
+    },
+    "silent-failure-audit": {
+      "effect": 0.233,
+      "n_paired": 150,
+      "with_pass": 0.813,
+      "without_pass": 0.58,
+      "effect_ci95": [
+        0.142,
+        0.325
+      ],
+      "significant": true,
+      "direction": "helps"
+    },
+    "guardrails": {
+      "effect": 0.107,
+      "n_paired": 150,
+      "with_pass": 0.76,
+      "without_pass": 0.653,
+      "effect_ci95": [
+        0.02,
+        0.194
+      ],
+      "significant": true,
+      "direction": "helps"
+    }
+  },
+  "eval_false_positive_rate": 1.0,
+  "eval_sensitivity": 0.984,
+  "n_tasks": 15,
+  "runs": 30,
+  "truncated": false,
+  "spend_usd": 0.087,
+  "calls": 1350,
+  "tokens": {
+    "in": 160818,
+    "out": 177366
+  }
+}

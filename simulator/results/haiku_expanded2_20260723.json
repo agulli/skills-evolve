@@ -1,0 +1,53 @@
+{
+  "model": "haiku",
+  "mode": "real",
+  "skill_effects": {
+    "eval-harness": {
+      "effect": 0.14,
+      "n_paired": 150,
+      "with_pass": 0.913,
+      "without_pass": 0.773,
+      "effect_ci95": [
+        0.071,
+        0.209
+      ],
+      "significant": true,
+      "direction": "helps"
+    },
+    "silent-failure-audit": {
+      "effect": 0.0,
+      "n_paired": 150,
+      "with_pass": 1.0,
+      "without_pass": 1.0,
+      "effect_ci95": [
+        0.0,
+        0.0
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "guardrails": {
+      "effect": 0.073,
+      "n_paired": 150,
+      "with_pass": 0.867,
+      "without_pass": 0.793,
+      "effect_ci95": [
+        -0.007,
+        0.154
+      ],
+      "significant": false,
+      "direction": "unclear"
+    }
+  },
+  "eval_false_positive_rate": 0.606,
+  "eval_sensitivity": 0.791,
+  "n_tasks": 15,
+  "runs": 30,
+  "truncated": false,
+  "spend_usd": 2.8164,
+  "calls": 1350,
+  "tokens": {
+    "in": 340598,
+    "out": 495162
+  }
+}
