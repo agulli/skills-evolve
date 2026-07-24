@@ -1,0 +1,41 @@
+{
+  "model": "gemini",
+  "mode": "real",
+  "skill_effects": {
+    "requirements-interrogation": {
+      "effect": -0.033,
+      "n_paired": 60,
+      "with_pass": 0.883,
+      "without_pass": 0.917,
+      "effect_ci95": [
+        -0.136,
+        0.07
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "culture-telemetry": {
+      "effect": 0.0,
+      "n_paired": 60,
+      "with_pass": 1.0,
+      "without_pass": 1.0,
+      "effect_ci95": [
+        0.0,
+        0.0
+      ],
+      "significant": false,
+      "direction": "unclear"
+    }
+  },
+  "eval_false_positive_rate": 1.0,
+  "eval_sensitivity": 0.947,
+  "n_tasks": 4,
+  "runs": 30,
+  "truncated": false,
+  "spend_usd": 0.0289,
+  "calls": 360,
+  "tokens": {
+    "in": 45658,
+    "out": 60838
+  }
+}

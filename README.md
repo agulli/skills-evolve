@@ -47,6 +47,7 @@ The core documentation has been split into a dedicated multi-part guide that det
 *   **[Evaluation Mechanism (The "Gate")](docs/evals_doc.md)**: How numeric gates ensure changes actually improve the agent.
 *   **[Evolution Mechanism (The "Engine")](docs/evolve_doc.md)**: How the agent learns from routing logs and telemetry to self-improve over time.
 *   **[Culture Telemetry (The "Commons")](docs/telemetry_doc.md)**: How local routing telemetry is aggregated to build a shared, public commons without leaking private data.
+*   **[Proof (Does it work?)](PROOF.md)**: The five claims — skills useful, router works, eval robust, local evolution works, global culture — each with real measurement and honest limits.
 *   **[Experiment Ledger (Shared Memory)](EXPERIMENTS.md)**: The append-only ledger tracking empirical measurements, simulator sweeps, and conclusions across Claude, Gemini, and human contributors.
 
 

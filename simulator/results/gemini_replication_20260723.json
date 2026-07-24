@@ -1,0 +1,77 @@
+{
+  "model": "gemini",
+  "mode": "real",
+  "skill_effects": {
+    "context-engineering": {
+      "effect": 0.0,
+      "n_paired": 240,
+      "with_pass": 1.0,
+      "without_pass": 1.0,
+      "effect_ci95": [
+        0.0,
+        0.0
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "grounding-citation": {
+      "effect": 0.139,
+      "n_paired": 180,
+      "with_pass": 0.489,
+      "without_pass": 0.35,
+      "effect_ci95": [
+        0.034,
+        0.244
+      ],
+      "significant": true,
+      "direction": "helps"
+    },
+    "tool-design": {
+      "effect": 0.842,
+      "n_paired": 120,
+      "with_pass": 1.0,
+      "without_pass": 0.158,
+      "effect_ci95": [
+        0.776,
+        0.907
+      ],
+      "significant": true,
+      "direction": "helps"
+    },
+    "eval-harness": {
+      "effect": 0.247,
+      "n_paired": 150,
+      "with_pass": 1.0,
+      "without_pass": 0.753,
+      "effect_ci95": [
+        0.178,
+        0.316
+      ],
+      "significant": true,
+      "direction": "helps"
+    },
+    "guardrails": {
+      "effect": 0.213,
+      "n_paired": 150,
+      "with_pass": 0.78,
+      "without_pass": 0.567,
+      "effect_ci95": [
+        0.113,
+        0.314
+      ],
+      "significant": true,
+      "direction": "helps"
+    }
+  },
+  "eval_false_positive_rate": 1.0,
+  "eval_sensitivity": 0.999,
+  "n_tasks": 28,
+  "runs": 30,
+  "truncated": false,
+  "spend_usd": 0.1495,
+  "calls": 2520,
+  "tokens": {
+    "in": 658398,
+    "out": 209103
+  }
+}
