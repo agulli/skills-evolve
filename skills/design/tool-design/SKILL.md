@@ -18,7 +18,7 @@ Tools are the agent's UI. Most "the model is dumb" bugs are actually tool-design
 
 ## Procedure
 
-1. **Set granularity from the task, not the API.** One tool per *agent-level intention*, not per endpoint. `search_orders(query)` beats `list_orders` + `filter_orders` + `sort_orders`. Merge tools that are always called in sequence; split tools whose description needs the word "or".
+1. **Set granularity from the task, not the API.** One tool per *agent-level intention*, not per endpoint. `search_orders(query)` beats `list_orders` + `filter_orders` + `sort_orders`. Merge tools that are always called in sequence; split tools whose description needs the word "or". The consolidation test: **if a human engineer can't say definitively which of two tools applies to a situation, the agent can't either** — merge them. The over-consolidation signal: a tool crossing ~8-10 parameters is two tools wearing one schema — split it.
 
 2. **Write the description for the model, not the docs site.** Each description must answer: what it does, when to prefer it over sibling tools, and what it returns. If two tools' descriptions could be swapped without looking wrong, the model can't choose between them either.
 

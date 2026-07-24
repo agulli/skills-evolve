@@ -23,6 +23,7 @@ You have an agent-engineering skill library. Do not wait to be asked: match the 
 |---|---|---|
 | starts a new agent with vague requirements, or asks "build me a bot that..." | `requirements-interrogation` | PROPOSE |
 | starts a new agent, or asks "should this be multi-agent?" | `agent-architecture` | PROPOSE |
+| about to launch a multi-hour/overnight autonomous run, or a long run returned something plausible that solved nothing | `long-horizon-brief` | PROPOSE |
 | starts a new agent project / has no coherent project structure | `agent-scaffolding` | PROPOSE |
 | builds handoffs between agents, or a coordinator delegating to sub-agents | `handoff-protocol` | PROPOSE |
 | writes/edits a system prompt, or reports the agent ignoring instructions | `prompt-architecture` | PROPOSE |

@@ -36,7 +36,7 @@ Pick the **simplest architecture that meets the requirements**, and record why. 
    | 6 | State graph | Long-lived process needing resume, retry, human-in-the-loop gates |
    | 7 | Peer multi-agent | Genuinely concurrent actors with independent goals (rare) |
 
-3. **Stress the choice** with the three costs every rung above 3 adds: latency (serialized model calls), debuggability (distributed traces), and error compounding (each hop multiplies failure probability). If you can't name the concrete benefit that pays these costs, go down a rung.
+3. **Stress the choice** with the three costs every rung above 3 adds: latency (serialized model calls), debuggability (distributed traces), and error compounding (each hop multiplies failure probability). If you can't name the concrete benefit that pays these costs, go down a rung. Budget honestly at rungs 4+: teams consistently estimate per-agent cost and forget coordination overhead, retries, and consensus rounds — multi-agent token spend lands at an order of magnitude (~10-15x) over a single agent on the same task, not 2-3x. And cap fan-out: ~3-5 workers per coordinator; beyond that the coordinator becomes the bottleneck and communication paths grow quadratically — add a tier instead of widening one.
 
 4. **Write the decision record** (output contract below) into the repo, e.g. `docs/adr/agent-architecture.md`.
 

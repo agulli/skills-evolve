@@ -519,6 +519,22 @@ def load_tasks() -> List[Task]:
         _mentions_any("split", r"sub-?agent", "handoff", "specializ", "route", "workflow",
                       "decompos"), base=0.35, eff=0.25)
 
+    LHB = ("SKILL long-horizon-brief: before an autonomous long run, write an exact success "
+           "predicate over the artifact (not effort/confidence), an explicit list of "
+           "near-misses that do NOT count, enumerated failure modes, and a return condition.")
+    add("lh-brief-0", "planning", "long-horizon-brief", LHB,
+        "An agent is about to run overnight on \"improve the API's performance.\" What must "
+        "the task brief contain before launch?",
+        _mentions_any("success predicate", "success criter", "measurable", "artifact",
+                      "not count", "failure mode", "return condition", "checkable"),
+        base=0.35, eff=0.25)
+    add("lh-brief-1", "planning", "long-horizon-brief", LHB,
+        "A 6-hour autonomous run returned a well-formatted report claiming success, but the "
+        "problem isn't solved. What was wrong with the launch, and what fixes it?",
+        _mentions_any("predicate", "answer-shaped", "near.?miss", "not count", "vague",
+                      "specif", "checkable", "brief"),
+        base=0.35, eff=0.25)
+
     HP = "SKILL handoff-protocol: design multi-agent handoff conventions, shared vs. isolated state, and message contracts between agents."
     add("handoff-0", "codegen", "handoff-protocol", HP,
         "Design the handoff contract when a coordinator delegates a task to a worker sub-agent. "
@@ -1206,6 +1222,14 @@ FIXTURES: Dict[str, Tuple[str, str]] = {
     "agent-arch-1": ("Split the agent into specialized sub-agents and route each tool call "
                      "to the right one via handoff.",
                      "Add more instructions to the prompt telling it to be more careful."),
+    "lh-brief-0": ("The brief needs a checkable success predicate over the artifact, a list "
+                   "of near-miss outcomes that do not count, enumerated failure modes, and a "
+                   "return condition.",
+                   "Tell the agent to do its best and report back in the morning."),
+    "lh-brief-1": ("The launch lacked an exact success predicate - the agent produced an "
+                   "answer-shaped artifact against a vague brief; fix it by making success "
+                   "checkable and listing near-misses that do not count.",
+                   "The agent just needs to work harder next time."),
     "handoff-0": ("The handoff message needs a schema containing the task, relevant context, "
                   "current state, and where to return the result.",
                   "Just have them talk to each other."),

@@ -6,13 +6,14 @@
 > cannot drift. Routing lives in [`skills/ROUTING.md`](../skills/ROUTING.md); the
 > telemetry spec in [telemetry_doc.md](telemetry_doc.md).
 
-**60 skills across 7 lifecycle groups.** Follow any link for the full
+**61 skills across 7 lifecycle groups.** Follow any link for the full
 procedure, when-to/when-not boundaries, output contract, and checklist.
 
 ## `design/` — Before code exists
 
 - **[agent-architecture](../skills/design/agent-architecture/SKILL.md)** — Choose and document the right agent architecture (single-loop ReAct, workflow, handoffs, state graph, multi-agent) for a task before writing code.
 - **[handoff-protocol](../skills/design/handoff-protocol/SKILL.md)** — Design the mechanics of multi-agent coordination — handoff conventions, shared vs. isolated state, message contracts between agents, and result-return — once you've chosen a multi-agent architecture.
+- **[long-horizon-brief](../skills/design/long-horizon-brief/SKILL.md)** — Write the task brief for an autonomous long-running agent — an exact success predicate over the artifact, an explicit list of near-misses that don't count, enumerated failure modes, and a return condition — so hours of unsupervised work can't end in an answer-shaped artifact that solves nothing.
 - **[prompt-architecture](../skills/design/prompt-architecture/SKILL.md)** — Design or refactor an agent's system prompt as a structured, budgeted artifact — sections, context layers, and degradation order.
 - **[requirements-interrogation](../skills/design/requirements-interrogation/SKILL.md)** — Force a structured requirements interview before designing or building an agent — extract what the agent must do, for whom, under what constraints, and how success is measured, one question at a time.
 - **[tool-adversarial-reading](../skills/design/tool-adversarial-reading/SKILL.md)** — Review a proposed tool schema (JSON schema, OpenAPI spec, Python signature) by acting as the dumbest, most literal-minded model possible to expose ambiguity.

@@ -20,7 +20,7 @@ An agent without evals is tuned by anecdote. The harness turns "seems better" in
 
 1. **Collect tasks from reality, not imagination.** Pull 20–50 tasks from real usage: logs, support tickets, the team's own prompts. Split: ~60% common cases, ~25% known-hard cases, ~15% regression cases (every past incident becomes a task forever). Synthetic tasks only to fill coverage gaps, and label them as synthetic.
 
-2. **Define per-task success criteria before running anything.** Each task gets: input, any required fixtures/state, and an explicit outcome check. Prefer checks in this order — exact/programmatic (file exists, test passes, API state correct) → rubric-scored by LLM judge → human review. If you can't state the success criterion, the task isn't ready.
+2. **Define per-task success criteria before running anything.** Each task gets: input, any required fixtures/state, and an explicit outcome check. Prefer checks in this order — exact/programmatic (file exists, test passes, API state correct) → rubric-scored by LLM judge → human review. If you can't state the success criterion, the task isn't ready. And when both kinds apply, deterministic checks are **gates, not score components**: a schema-invalid or structurally-broken artifact fails outright and never reaches the judge — otherwise an invalid output gets laundered by a favorable LLM score into a passing composite.
 
 3. **Grade outcomes, not transcripts.** For agents, assert on end state (did the ticket get the right label? does the code pass the hidden tests?), not on whether the agent took your favorite path. Add trajectory assertions only for hard constraints (never called tool X, stayed under N turns, under $Y cost).
 
