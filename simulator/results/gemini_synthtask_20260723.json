@@ -1,0 +1,29 @@
+{
+  "model": "gemini",
+  "mode": "real",
+  "skill_effects": {
+    "synthetic-task-generation": {
+      "effect": 0.133,
+      "n_paired": 30,
+      "with_pass": 1.0,
+      "without_pass": 0.867,
+      "effect_ci95": [
+        0.012,
+        0.255
+      ],
+      "significant": true,
+      "direction": "helps"
+    }
+  },
+  "eval_false_positive_rate": 0.0,
+  "eval_sensitivity": 0.633,
+  "n_tasks": 1,
+  "runs": 30,
+  "truncated": false,
+  "spend_usd": 0.0017,
+  "calls": 90,
+  "tokens": {
+    "in": 6334,
+    "out": 2570
+  }
+}
