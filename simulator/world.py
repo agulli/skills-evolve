@@ -127,6 +127,19 @@ class World:
             w.skills.append(SkillTruth(name, effect, gen_sensitive=False, malicious=False))
         return w
 
+    def plant_malicious(self, rng: random.Random, n: int) -> "World":
+        """Add `n` synthetic malicious skills on top of the real honest ones,
+        for adversarial testing on a REAL honest baseline (EXP-023). The real
+        measured skills stay honest (malicious=False); the attack is whether
+        the culture blocks these planted bad actors while still promoting the
+        real good ones. Returns self for chaining."""
+        for i in range(n):
+            effect = {tier: {c: -rng.uniform(0.02, 0.08) for c in self.classes}
+                      for tier in self.tiers}
+            self.skills.append(SkillTruth(f"__malicious_{i}", effect,
+                                          gen_sensitive=False, malicious=True))
+        return self
+
     def newcomer_uplift(self, canon_by_class: Dict[str, List[int]], tier: str) -> float:
         """Canon-value curve (the emergence metric): the true uplift a fresh
         adopter of `tier` gets from today's Canon, averaged over classes, with

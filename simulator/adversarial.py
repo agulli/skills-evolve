@@ -27,9 +27,46 @@ Deterministic per --seed. Pure stdlib, no network, no LLM calls.
 """
 import argparse
 import json
+import random
 from typing import Dict, List
 
 from .run import simulate, load_skill_names
+from .world import World
+
+
+def real_data_attack(haiku_json: str, gemini_json: str, seed: int = 7,
+                     nodes: int = 100, rounds: int = 60, n_malicious: int = 6) -> List[Dict]:
+    """Run the sybil-scale attack on the REAL measured 61-skill effect
+    distribution (honest baseline) + `n_malicious` planted bad actors, with
+    and without the org_weight_cap defense from EXP-017. Tests: does the
+    culture promote the real good skills while blocking the planted attackers,
+    under escalating sybil pressure? (EXP-023)"""
+    with open(haiku_json) as f:
+        haiku = json.load(f)["skill_effects"]
+    with open(gemini_json) as f:
+        gemini = json.load(f)["skill_effects"]
+    measured = {"haiku": haiku, "gemini-flash-lite": gemini}
+
+    def make_world():
+        w = World.from_measured(random.Random(seed), measured)
+        w.plant_malicious(random.Random(seed + 1), n_malicious)
+        return w
+
+    out = []
+    for n_sybil in [0, 4, 8, 16, 24]:
+        for cap in [None, 15]:
+            r = simulate(seed=seed, nodes=nodes, rounds=rounds, malicious_rate=0.0,
+                         optimist_rate=0.0, gamer_rate=0.0, sybil_orgs=n_sybil,
+                         eval_key="typical", churn_every=0, hard=False,
+                         skill_names=[], world=make_world(),
+                         org_weight_cap=cap)
+            out.append({
+                "sybil_orgs": n_sybil, "org_weight_cap": cap,
+                "precision": r["canon_precision"], "recall": r["canon_recall"],
+                "malicious_established": r["malicious_established"],
+                "n_promoted": r["n_promoted"], "n_truly_good": r["n_truly_good"],
+            })
+    return out
 
 
 def _run(skill_names: List[str], seed: int, nodes: int, rounds: int, label: str, **kw) -> Dict:
