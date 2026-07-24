@@ -11,6 +11,14 @@ actual breaking point rather than confirming survival at one fixed setting:
      malicious-favoring nodes identically in the same round - the org-jackknife
      can't detect this because it's not an org-independence problem at all.
   3. Worst-case combined attack (all vectors at once) crossed with eval quality.
+  4. min_orgs defense-tuning: does raising the org-jackknife's independent-org
+     threshold (hardcoded to 3 by default in commons.py) push out the sybil
+     breaking point found in sweep 1, and at what cost to legitimate-skill
+     promotion speed for newcomer orgs? (Answer, EXP-017: NO - it does nothing
+     at any value 3-10, because it was never the binding constraint.)
+  5. org_weight_cap defense: caps how much confirm/refute weight ANY single
+     org can contribute (regardless of how many rounds it fabricates evidence
+     for) - the mechanism sweep 4 shows is actually missing.
 
 NOTE: this tests the MECHANISM's resilience if a real community existed - it is
 not a measurement of a real community under attack until one actually exists
@@ -41,7 +49,8 @@ def _run(skill_names: List[str], seed: int, nodes: int, rounds: int, label: str,
 
 
 def sweep(skill_names: List[str], seed: int = 7, nodes: int = 100, rounds: int = 60) -> Dict:
-    results = {"sybil_scale": [], "blindspot_exploit": [], "worst_case": []}
+    results = {"sybil_scale": [], "blindspot_exploit": [], "worst_case": [],
+              "min_orgs_defense": [], "org_weight_cap_defense": []}
 
     # Sweep 1: sybil-org scale (org-jackknife stress test) at a modest attack.
     for n_sybil in [0, 1, 2, 3, 4, 6, 8, 12, 16, 24]:
@@ -63,6 +72,40 @@ def sweep(skill_names: List[str], seed: int = 7, nodes: int = 100, rounds: int =
             skill_names, seed, nodes, rounds, f"eval={ev}",
             malicious_rate=0.20, sybil_orgs=8, gamer_rate=0.25,
             optimist_rate=0.30, eval_key=ev))
+
+    # Sweep 4: min_orgs defense tuning. Sweep 1 found the org-jackknife (at
+    # its hardcoded default min_orgs=3) breaks between sybil_orgs=16 (safe)
+    # and sybil_orgs=24 (2 malicious skills established). Does raising
+    # min_orgs push that breaking point out, and what does it cost legitimate
+    # promotion (sybil_orgs=0, same min_orgs) in the meantime?
+    for mo in [3, 5, 7, 10]:
+        baseline = _run(skill_names, seed, nodes, rounds, f"min_orgs={mo},sybil=0",
+                        malicious_rate=0.08, sybil_orgs=0, eval_key="typical", min_orgs=mo)
+        at_16 = _run(skill_names, seed, nodes, rounds, f"min_orgs={mo},sybil=16",
+                     malicious_rate=0.08, sybil_orgs=16, eval_key="typical", min_orgs=mo)
+        at_24 = _run(skill_names, seed, nodes, rounds, f"min_orgs={mo},sybil=24",
+                     malicious_rate=0.08, sybil_orgs=24, eval_key="typical", min_orgs=mo)
+        at_32 = _run(skill_names, seed, nodes, rounds, f"min_orgs={mo},sybil=32",
+                     malicious_rate=0.08, sybil_orgs=32, eval_key="typical", min_orgs=mo)
+        results["min_orgs_defense"].extend([baseline, at_16, at_24, at_32])
+
+    # Sweep 5: org_weight_cap defense - the mechanism sweep 4 shows is
+    # actually missing. Cap ANY org's total confirm/refute weight per
+    # (skill, class) regardless of round count. Test whether this restores
+    # resilience at sybil_orgs=24/32 (where uncapped + any min_orgs failed),
+    # and what it costs legitimate promotion at sybil_orgs=0.
+    for cap in [None, 50, 20, 10, 5]:
+        label_cap = "uncapped" if cap is None else str(cap)
+        baseline = _run(skill_names, seed, nodes, rounds, f"cap={label_cap},sybil=0",
+                        malicious_rate=0.08, sybil_orgs=0, eval_key="typical",
+                        org_weight_cap=cap)
+        at_24 = _run(skill_names, seed, nodes, rounds, f"cap={label_cap},sybil=24",
+                     malicious_rate=0.08, sybil_orgs=24, eval_key="typical",
+                     org_weight_cap=cap)
+        at_32 = _run(skill_names, seed, nodes, rounds, f"cap={label_cap},sybil=32",
+                     malicious_rate=0.08, sybil_orgs=32, eval_key="typical",
+                     org_weight_cap=cap)
+        results["org_weight_cap_defense"].extend([baseline, at_24, at_32])
 
     return results
 
@@ -90,3 +133,5 @@ if __name__ == "__main__":
     print("#   independently-noisy eval succeeds the moment the eval has a CORRELATED blind spot.")
     print("# worst_case: a well-resourced multi-vector attack that partially defeats even a")
     print("#   'strong' eval - past some attack size, eval quality stops being the dominant lever.")
+    print("# min_orgs_defense: does raising the org-jackknife's independent-org threshold push out")
+    print("#   the sybil breaking point, and at what cost to legitimate-skill promotion speed?")

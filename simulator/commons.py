@@ -35,12 +35,22 @@ class Ledger:
         cell[0] += c
         cell[1] += r
 
-    def _confirms_refutes(self, skill_idx: int, uclass: str, drop_org: int = None):
+    def _confirms_refutes(self, skill_idx: int, uclass: str, drop_org: int = None,
+                          org_weight_cap: float = None):
+        """org_weight_cap bounds ONE org's total contribution regardless of
+        how many rounds/nodes it fabricated evidence from - min_orgs (a COUNT
+        of distinct orgs) does nothing against a sybil org that just
+        accumulates unbounded WEIGHT every round; this caps that directly
+        (see EXPERIMENTS.md EXP-017 - raising min_orgs 3->10 changed nothing,
+        because it was never the binding constraint)."""
         c = r = 0.0
         orgs = set()
         for org, (cw, rw) in self.evidence[(skill_idx, uclass)].items():
             if org == drop_org:
                 continue
+            if org_weight_cap is not None:
+                cw = min(cw, org_weight_cap)
+                rw = min(rw, org_weight_cap)
             c += cw
             r += rw
             if cw > 0:
@@ -48,20 +58,23 @@ class Ledger:
         return c, r, orgs
 
     def _class_promotable(self, skill_idx: int, uclass: str,
-                          promote_p: float, min_orgs: int) -> bool:
-        c, r, orgs = self._confirms_refutes(skill_idx, uclass)
+                          promote_p: float, min_orgs: int,
+                          org_weight_cap: float = None) -> bool:
+        c, r, orgs = self._confirms_refutes(skill_idx, uclass, org_weight_cap=org_weight_cap)
         if len(orgs) < min_orgs:
             return False
         if beta_tail(c, r) < promote_p:
             return False
         # org-jackknife: must still clear if any single org is removed
         for org in list(orgs):
-            cj, rj, oj = self._confirms_refutes(skill_idx, uclass, drop_org=org)
+            cj, rj, oj = self._confirms_refutes(skill_idx, uclass, drop_org=org,
+                                                org_weight_cap=org_weight_cap)
             if len(oj) < min_orgs - 1 or beta_tail(cj, rj) < promote_p:
                 return False
         return True
 
-    def tally(self, promote_p: float = 0.9, min_orgs: int = 3, min_classes: int = 2):
+    def tally(self, promote_p: float = 0.9, min_orgs: int = 3, min_classes: int = 2,
+             org_weight_cap: float = None):
         """Recompute status for every skill with evidence."""
         skills = {sk for (sk, _cl) in self.evidence}
         for sk in skills:
@@ -69,7 +82,7 @@ class Ledger:
                 self.status[sk] = "blocked"
                 continue
             good_classes = [cl for (s2, cl) in self.evidence if s2 == sk
-                            and self._class_promotable(sk, cl, promote_p, min_orgs)]
+                            and self._class_promotable(sk, cl, promote_p, min_orgs, org_weight_cap)]
             cur = self.status.get(sk, "shared")
             if len(good_classes) >= min_classes:
                 # proposed on first qualification; canon once it has persisted
@@ -80,14 +93,15 @@ class Ledger:
                 else:
                     self.status[sk] = "shared"
 
-    def canon_by_class(self, promote_p: float = 0.9, min_orgs: int = 3) -> Dict[str, List[int]]:
+    def canon_by_class(self, promote_p: float = 0.9, min_orgs: int = 3,
+                       org_weight_cap: float = None) -> Dict[str, List[int]]:
         """Which skills a newcomer would adopt for each class from today's Canon."""
         out: Dict[str, List[int]] = defaultdict(list)
         for sk, st in self.status.items():
             if st != "canon" or sk in self.blocked:
                 continue
             for (s2, cl) in self.evidence:
-                if s2 == sk and self._class_promotable(sk, cl, promote_p, min_orgs):
+                if s2 == sk and self._class_promotable(sk, cl, promote_p, min_orgs, org_weight_cap):
                     out[cl].append(sk)
         return out
 

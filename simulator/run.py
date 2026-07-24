@@ -50,7 +50,9 @@ def truly_good_set(world: World, min_classes: int = 2) -> set:
 def simulate(seed: int, nodes: int, rounds: int, *, malicious_rate: float,
              optimist_rate: float, gamer_rate: float, sybil_orgs: int,
              eval_key: str, churn_every: int, hard: bool,
-             skill_names: List[str], world: World = None) -> Dict:
+             skill_names: List[str], world: World = None,
+             min_orgs: int = 3, promote_p: float = 0.9,
+             org_weight_cap: float = None) -> Dict:
     rng = random.Random(seed)
     if world is None:
         kw = dict(effect_lo=0.02, effect_hi=0.06, good_share=0.22) if hard else {}
@@ -77,8 +79,9 @@ def simulate(seed: int, nodes: int, rounds: int, *, malicious_rate: float,
                 if rep is not None:
                     skill_idx, cw, rw = rep
                     ledger.record(node.org, skill_idx, node.uclass, cw, rw)
-        ledger.tally()
-        cbc = ledger.canon_by_class()
+        ledger.tally(promote_p=promote_p, min_orgs=min_orgs, org_weight_cap=org_weight_cap)
+        cbc = ledger.canon_by_class(promote_p=promote_p, min_orgs=min_orgs,
+                                    org_weight_cap=org_weight_cap)
         canon_value.append((rnd,
                             round(world.newcomer_uplift(cbc, world.tiers[0]), 4),
                             round(world.newcomer_uplift(cbc, world.tiers[1]), 4)))
