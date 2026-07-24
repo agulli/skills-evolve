@@ -29,6 +29,10 @@ BENCHMARK_DATASET = [
     
     # build
     ("The token cost is skyrocketing as this long-horizon agent session grows.", "context-engineering"),
+    ("The agent keeps repeating a wrong fact from an old tool output even after I corrected it twice.", "context-degradation"),
+    ("Instructions that are definitely in the context get ignored once the conversation gets long.", "context-degradation"),
+    ("I'm about to kick off an overnight autonomous run on a hard problem - what should the task spec contain?", "long-horizon-brief"),
+    ("Yesterday's 6-hour agent run returned a polished report that didn't actually solve the problem.", "long-horizon-brief"),
     ("The agent answers user questions from PDFs but doesn't cite where it found the answer.", "grounding-citation"),
     ("We need to build an MCP server wrapping our SQL database.", "mcp-server"),
     ("Store user preferences across sessions so the agent remembers them next time.", "memory-design"),
@@ -97,6 +101,20 @@ BENCHMARK_DATASET = [
     ("Make unit testing for custom agent tools faster.", "testing-ergonomics"),
 ]
 
+# Negative controls: queries that should route to NOTHING. A router that fires
+# a skill here is a false-fire — the costlier error for an AUTO-tier skill.
+# `expected="none"` means "the correct answer is to not route."
+NEGATIVE_CONTROLS = [
+    ("What's the capital of France?", "none"),
+    ("Write me a haiku about the ocean.", "none"),
+    ("Thanks, that's really helpful!", "none"),
+    ("Can you explain how photosynthesis works?", "none"),
+    ("What time is it in Tokyo right now?", "none"),
+    ("Translate 'good morning' into Spanish.", "none"),
+    ("Tell me a joke.", "none"),
+    ("What's 15% of 240?", "none"),
+]
+
 
 def load_routing_table() -> str:
     path = os.path.join(os.path.dirname(__file__), "..", "skills", "ROUTING.md")
@@ -129,7 +147,10 @@ def llm_route_query(adapter, query: str, routing_table: str) -> str:
     """Route query using live LLM provider adapter."""
     system_prompt = (
         "You are an expert agent routing engine. Given a user query and the routing table below, "
-        "select the single best matching skill name. Output ONLY the skill name string (e.g., 'eval-harness'), nothing else.\n\n"
+        "select the single best matching skill name. If NO skill genuinely matches the user's "
+        "behavior — the query is unrelated to agent engineering, or is smalltalk/general chat — "
+        "output exactly 'none'. Do not force a match. "
+        "Output ONLY the skill name string (e.g., 'eval-harness') or 'none', nothing else.\n\n"
         f"ROUTING TABLE:\n{routing_table}"
     )
     user_prompt = f"USER QUERY: {query}\n\nMATCHING SKILL:"
@@ -142,10 +163,14 @@ def llm_route_query(adapter, query: str, routing_table: str) -> str:
 
 def run_benchmark(mode: str = "mock", model_name: str = "haiku") -> Dict:
     routing_table = load_routing_table()
-    total = len(BENCHMARK_DATASET)
+    dataset = BENCHMARK_DATASET + NEGATIVE_CONTROLS
+    total = len(dataset)
     correct = 0
     results = []
-    
+    # negative-control accounting: a false-fire is routing SOMETHING on a
+    # query whose correct answer is "none".
+    neg_total = neg_correct = false_fires = 0
+
     adapter = None
     if mode == "llm":
         sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -157,26 +182,38 @@ def run_benchmark(mode: str = "mock", model_name: str = "haiku") -> Dict:
             print(f"Warning: Could not initialize LLM adapter '{model_name}': {e}. Falling back to mock matcher.")
             mode = "mock"
 
-    print(f"Running Router Benchmark ({mode.upper()} mode, {total} queries)...")
-    
-    for query, expected in BENCHMARK_DATASET:
+    print(f"Running Router Benchmark ({mode.upper()} mode, {total} queries "
+          f"= {len(BENCHMARK_DATASET)} positive + {len(NEGATIVE_CONTROLS)} negative-control)...")
+
+    for query, expected in dataset:
         if mode == "llm" and adapter is not None:
             predicted = llm_route_query(adapter, query, routing_table)
         else:
             predicted = mock_route_query(query, routing_table)
-            
+
         is_correct = (predicted == expected)
         if is_correct:
             correct += 1
+        if expected == "none":
+            neg_total += 1
+            if predicted == "none":
+                neg_correct += 1
+            else:
+                false_fires += 1
         results.append({
             "query": query,
             "expected": expected,
             "predicted": predicted,
             "correct": is_correct
         })
-        
+
     accuracy = correct / total
-    print(f"Benchmark Complete! Accuracy: {correct}/{total} ({accuracy * 100:.1f}%)")
+    pos_total = len(BENCHMARK_DATASET)
+    pos_correct = correct - neg_correct
+    print(f"Benchmark Complete! Overall: {correct}/{total} ({accuracy * 100:.1f}%)")
+    print(f"  Positive top-1:  {pos_correct}/{pos_total} ({pos_correct/pos_total*100:.1f}%)")
+    print(f"  Negative-control abstain: {neg_correct}/{neg_total} "
+          f"(false-fire rate {false_fires}/{neg_total} = {false_fires/max(neg_total,1)*100:.1f}%)")
     
     return {
         "total": total,
