@@ -132,3 +132,7 @@ Every skill in this library follows the same contract:
 2. **Production-ready means checkable.** Every skill ends in a verifiable checklist, not vibes.
 3. **Skills compose.** `design/tool-design` output feeds `safety/injection-audit`; `eval/trajectory-review` findings feed `evolve/self-improvement-loop`.
 4. **Small context footprint.** SKILL.md stays under ~150 lines; heavyweight reference material goes in `references/` inside the skill directory and is read only when needed.
+
+## License
+
+[MIT](LICENSE) — © 2026 Antonio Gulli. Use it, modify it, build on it — keep the copyright notice.
