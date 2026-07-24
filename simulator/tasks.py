@@ -477,6 +477,507 @@ def load_tasks() -> List[Task]:
         _mentions_any("canary", "staged rollout", "approval", "review", "staging", "blue.?green"),
         base=0.3, eff=0.3)
 
+    # =========================================================================== #
+    # First-ever task coverage for the 47 skills with zero prior measurement
+    # (EXP-019). 2 tasks/skill - a first real signal, not the ~8-15/skill
+    # target. Registrars are deliberately broad (many synonyms, _CODE_SIGNAL
+    # included wherever a code answer is plausible) to avoid re-introducing
+    # the EXP-009/013/016/018 anti-pattern from day one instead of retrofitting
+    # it later.
+    # =========================================================================== #
+
+    # ---- design/ ----
+    AA = "SKILL agent-architecture: choose and document the right agent architecture (single-loop, workflow, handoffs, state graph, multi-agent) before writing code."
+    add("agent-arch-0", "codegen", "agent-architecture", AA,
+        "A team wants an agent that handles refunds, checks inventory, and escalates fraud. "
+        "Should this be single-agent or multi-agent? Justify with the specific pattern.",
+        _mentions_any(r"single.?loop", "react", "workflow", "handoff", "state graph",
+                      "multi-agent", "single agent", "sub-?agent"), base=0.35, eff=0.25)
+    add("agent-arch-1", "codegen", "agent-architecture", AA,
+        "An agent's ReAct loop has grown to 15 tools and keeps picking the wrong one. "
+        "What architecture change fixes this?",
+        _mentions_any("split", r"sub-?agent", "handoff", "specializ", "route", "workflow",
+                      "decompos"), base=0.35, eff=0.25)
+
+    HP = "SKILL handoff-protocol: design multi-agent handoff conventions, shared vs. isolated state, and message contracts between agents."
+    add("handoff-0", "codegen", "handoff-protocol", HP,
+        "Design the handoff contract when a coordinator delegates a task to a worker sub-agent. "
+        "What must the message contain?",
+        _mentions_any("task", "context", "state", "return", "result", "contract", "schema"),
+        base=0.35, eff=0.22)
+    add("handoff-1", "codegen", "handoff-protocol", HP,
+        "Two sub-agents keep duplicating work because neither knows what the other already did. "
+        "Fix the coordination.",
+        _mentions_any("shared state", "shared context", "isolat", "message", "handoff",
+                      "coordinat"), base=0.35, eff=0.22)
+
+    RI = "SKILL requirements-interrogation: force a structured requirements interview before designing or building an agent, one question at a time."
+    add("req-interro-0", "codegen", "requirements-interrogation", RI,
+        "A stakeholder says \"build me an agent that handles support tickets.\" What's the "
+        "first thing to do before any design work?",
+        _mentions_any("question", "who", "success criteria", "constraint", "scope",
+                      "measure", "interview"), base=0.35, eff=0.22)
+    add("req-interro-1", "codegen", "requirements-interrogation", RI,
+        "Requirements for a new agent are vague and assumed. Force a structured process "
+        "instead of guessing.",
+        _mentions_any("one question at a time", "constraint", "success criteria", "scope",
+                      "stakeholder", "interview"), base=0.35, eff=0.22)
+
+    # ---- build/ ----
+    MCP = "SKILL mcp-server: scaffold, review, or debug an MCP server - transport, tool surface, auth, packaging."
+    add("mcp-0", "tool-using", "mcp-server", MCP,
+        "Design the tool surface for an MCP server wrapping a CRM API. What choices matter "
+        "for transport and auth?",
+        _mentions_any("stdio", "http", "sse", "oauth", "auth", "transport"), base=0.35, eff=0.22)
+    add("mcp-1", "tool-using", "mcp-server", MCP,
+        "An MCP server's tools work in isolated testing but misbehave inside a client like "
+        "Claude Code. Diagnose and fix.",
+        _mentions_any("schema", "transport", "timeout", "auth", "stderr", "protocol",
+                      "logging"), base=0.35, eff=0.22)
+
+    MEM = "SKILL memory-design: design an agent's memory system - what to remember, storage tiers, retrieval, forgetting policy."
+    add("memory-0", "codegen", "memory-design", MEM,
+        "An agent's memory grows unbounded across sessions. Design the forgetting policy.",
+        _mentions_any("ttl", "expir", "decay", "prune", "summariz", "tier", "retention"),
+        base=0.35, eff=0.22)
+    add("memory-1", "codegen", "memory-design", MEM,
+        "Retrieved memories are often stale or irrelevant to the current task. Fix the "
+        "retrieval.",
+        _mentions_any("recency", "relevance", "rank", "retrieval", "refresh", "invalidat",
+                      "score"), base=0.35, eff=0.22)
+
+    MM = "SKILL multimodal: design an agent's handling of images, documents/PDFs, and audio - preprocessing, cost budgeting, grounding."
+    add("multimodal-0", "codegen", "multimodal", MM,
+        "An agent ingests scanned PDFs but frequently misreads numbers in tables. Fix the "
+        "pipeline.",
+        _mentions_any("ocr", "vision", "extract", "table", "preprocess", "structured"),
+        base=0.35, eff=0.22)
+    add("multimodal-1", "codegen", "multimodal", MM,
+        "Image inputs are expensive and slow for an agent. Budget the multimodal cost.",
+        _mentions_any("resize", "resolution", "downsample", "token", "cache", "budget"),
+        base=0.35, eff=0.22)
+
+    RD = "SKILL retrieval-design: design the retrieval layer for a knowledge agent - chunking, indexing, ranking, context budget."
+    add("retrieval-0", "codegen", "retrieval-design", RD,
+        "A RAG agent keeps answering from irrelevant chunks. Fix the retrieval pipeline.",
+        _mentions_any("chunk", "rank", "rerank", "embed", "query", "relevance", "index"),
+        base=0.35, eff=0.22)
+    add("retrieval-1", "codegen", "retrieval-design", RD,
+        "Too much retrieved content reaches the context window, bloating cost. Fix it.",
+        _mentions_any(r"top.?k", "limit", "rerank", "truncat", "filter", "budget"),
+        base=0.35, eff=0.22)
+
+    SA = "SKILL skill-authoring: write or review a SKILL.md so it triggers reliably, stays small, and produces checkable output."
+    add("skill-author-0", "codegen", "skill-authoring", SA,
+        "A new SKILL.md never fires when it should. Diagnose and fix it.",
+        _mentions_any("description", "trigger", "when to use", "example", "keyword"),
+        base=0.35, eff=0.22)
+    add("skill-author-1", "codegen", "skill-authoring", SA,
+        "A skill fires on tasks it shouldn't. Fix the trigger.",
+        _mentions_any("description", "trigger", "narrow", "when not to use", "scope"),
+        base=0.35, eff=0.22)
+
+    SM = "SKILL state-management: design durable state for long-running agents - checkpointing, resume, idempotency, pause/resume."
+    add("state-mgmt-0", "codegen", "state-management", SM,
+        "A long-running agent crashes mid-task and loses all progress. Fix it.",
+        _mentions_any("checkpoint", "resume", "persist", "idempotent", "durable"),
+        base=0.35, eff=0.22)
+    add("state-mgmt-1", "codegen", "state-management", SM,
+        "An agent needs to pause for human approval mid-run and resume later. Design it.",
+        _mentions_any("pause", "resume", "checkpoint", r"human.?in.?the.?loop", "wait"),
+        base=0.35, eff=0.22)
+
+    # ---- dev/ ----
+    ACR = "SKILL agent-code-review: review agent code changes for prompt/tool edits, context and cost impact, non-determinism, safety-surface changes."
+    add("agent-cr-0", "codegen", "agent-code-review", ACR,
+        "Review a PR that changes an agent's system prompt. What should a reviewer check "
+        "beyond normal code review?",
+        _mentions_any("prompt", "regression", "eval", "cost", "token", r"non-?determin"),
+        base=0.35, eff=0.22)
+    add("agent-cr-1", "codegen", "agent-code-review", ACR,
+        "A PR adds a new tool to an agent. What's the review checklist?",
+        _mentions_any("schema", "permission", "blast radius", "eval", "test", "enum"),
+        base=0.35, eff=0.22)
+
+    ASC = "SKILL agent-scaffolding: stand up a new agent project with the right structure from the first commit."
+    add("scaffold-0", "codegen", "agent-scaffolding", ASC,
+        "Start a brand-new agent project from scratch. What should exist before writing "
+        "the first prompt?",
+        _mentions_any("eval", "config", "observability", "structure", "dev loop"),
+        base=0.35, eff=0.22)
+    add("scaffold-1", "codegen", "agent-scaffolding", ASC,
+        "An existing agent grew without any coherent project structure. Fix the layout.",
+        _mentions_any("structure", "separate", "config", "layout", "modular"),
+        base=0.35, eff=0.22)
+
+    CO = "SKILL codebase-onboarding: get productive fast in an unfamiliar agent codebase - locate prompt, tools, control loop, config, evals, traces."
+    add("onboard-0", "codegen", "codebase-onboarding", CO,
+        "You're inheriting an agent codebase you didn't write. What's the first thing to map?",
+        _mentions_any("prompt", "tool", "control loop", "config", "eval", "trace"),
+        base=0.35, eff=0.22)
+    add("onboard-1", "codegen", "codebase-onboarding", CO,
+        "Onboard a new teammate to an unfamiliar agent repo fast. What do you show them first?",
+        _mentions_any("prompt", "tool", "flow", "trace", "entry point"), base=0.35, eff=0.22)
+
+    LR = "SKILL local-replay: reproduce a single failing agent run locally and step through it instead of guessing or re-running live."
+    add("replay-0", "codegen", "local-replay", LR,
+        "A user reports one bad interaction. Reproduce it locally instead of guessing.",
+        _mentions_any("record", "replay", "trace", "log", "reproduce"), base=0.35, eff=0.22)
+    add("replay-1", "codegen", "local-replay", LR,
+        "Debugging a failing agent run by re-running it live burns tokens every time. "
+        "Fix the loop.",
+        _mentions_any("cache", "replay", "record", "mock", "snapshot"), base=0.35, eff=0.22)
+
+    PE = "SKILL prompt-experimentation: run a disciplined prompt/config experiment - variants, a fixed task set, one metric, a kept winner."
+    add("prompt-exp-0", "codegen", "prompt-experimentation", PE,
+        "Someone says \"this prompt wording feels better.\" Turn that into a real experiment.",
+        _mentions_any("variant", "task set", "metric", r"a/b", "baseline", r"held.?out"),
+        base=0.35, eff=0.22)
+    add("prompt-exp-1", "codegen", "prompt-experimentation", PE,
+        "Compare two prompt variants rigorously before picking a winner.",
+        _mentions_any("variant", "metric", "fixed task", "significan", "baseline"),
+        base=0.35, eff=0.22)
+
+    TE = "SKILL testing-ergonomics: fast, cheap, deterministic agent tests - mock the model, stub tools, snapshot outputs."
+    add("testing-erg-0", "codegen", "testing-ergonomics", TE,
+        "Agent tests hit the real model every time, making them slow and flaky. Fix it.",
+        _mentions_any("mock", "stub", "snapshot", "fixture", "fake", _CODE_SIGNAL),
+        base=0.35, eff=0.22)
+    add("testing-erg-1", "codegen", "testing-ergonomics", TE,
+        "A tool needs a fast unit test without calling the network.",
+        _mentions_any("mock", "stub", "unit test", "fixture", _CODE_SIGNAL), base=0.35, eff=0.22)
+
+    # ---- eval/ ----
+    AR2 = "SKILL adversarial-review: spawn a reviewer biased to disprove, not approve, a non-trivial agent design decision before it stands."
+    add("adv-review-0", "eval", "adversarial-review", AR2,
+        "A team is confident their new agent architecture is safe. Stress-test that "
+        "confidence before shipping.",
+        _mentions_any("disprove", "adversarial", "fresh context", "attack", "red team",
+                      "assumption"), base=0.35, eff=0.22)
+    add("adv-review-1", "eval", "adversarial-review", AR2,
+        "An architecture decision was made under uncertainty with a high blast radius. "
+        "What review process should precede shipping it?",
+        _mentions_any("adversarial", "disprove", "bias", "fresh", "independent", "review"),
+        base=0.35, eff=0.22)
+
+    LJ = "SKILL llm-judge: design and calibrate an LLM-as-judge grader - rubric, prompt, bias controls, validation against human labels."
+    add("llm-judge-0", "eval", "llm-judge", LJ,
+        "Grade summary quality where there's no single exact answer. Design the judge.",
+        _mentions_any("rubric", "criteria", "pairwise", "calibrat", "bias", "score"),
+        base=0.35, eff=0.22)
+    add("llm-judge-1", "eval", "llm-judge", LJ,
+        "A judge's scores don't match human judgment. Fix the calibration.",
+        _mentions_any("calibrat", "human", "agreement", "kappa", "label", "rubric"),
+        base=0.35, eff=0.22)
+
+    MC = "SKILL model-card: document an agent's capabilities, limitations, intended use, and evaluated performance in a standard card."
+    add("model-card-0", "eval", "model-card", MC,
+        "An agent reaches a release milestone. Document what it can and can't do.",
+        _mentions_any("capabilit", "limitation", "intended use", "evaluat", "performance"),
+        base=0.35, eff=0.22)
+    add("model-card-1", "eval", "model-card", MC,
+        "Nobody on the team can say what the agent is actually good at. Fix that gap.",
+        _mentions_any("capabilit", "limitation", "document", "card", "evaluat"),
+        base=0.35, eff=0.22)
+
+    TR = "SKILL trajectory-review: analyze agent transcripts to find where and why runs go wrong - failure taxonomy, first-divergence analysis."
+    add("traj-review-0", "eval", "trajectory-review", TR,
+        "An agent's eval scores just dropped. Find the cause from the traces.",
+        _mentions_any("first divergence", "trace", "step", "taxonomy", "backward",
+                      "root cause"), base=0.35, eff=0.22)
+    add("traj-review-1", "eval", "trajectory-review", TR,
+        "A production trace shows the same failure mode across many runs. Diagnose it.",
+        _mentions_any("pattern", "taxonomy", "cluster", "trace", "systematic", "divergence"),
+        base=0.35, eff=0.22)
+
+    VD = "SKILL verifier-design: design and stress-test the pass/fail check behind an eval, not the tasks - the check itself."
+    add("verifier-design-0", "eval", "verifier-design", VD,
+        "A registrar checks for the literal phrase \"toxicity classifier\" and fails a model "
+        "that instead writes runnable code with a keyword blocklist function. Diagnose the flaw.",
+        _mentions_any("code", "keyword", "narrow", "checkable", "false negative", "proxy"),
+        base=0.35, eff=0.22)
+    add("verifier-design-1", "eval", "verifier-design", VD,
+        "An eval shows a large, surprising HURTS result right after a one-line change. "
+        "What do you check first, before trusting it?",
+        _mentions_any("raw completion", "read", "fixture", r"should.?pass", r"should.?fail",
+                      "transcript"), base=0.35, eff=0.22)
+
+    # ---- evolve/ ----
+    CT = "SKILL culture-telemetry: emit anonymized, signed usage statistics daily to a shared commons - no prompt, trace, or implementation ever leaves the node."
+    add("culture-tel-0", "evolve", "culture-telemetry", CT,
+        "Design what gets published to the shared commons daily from routing logs, without "
+        "leaking prompts or traces.",
+        _mentions_any("anonymiz", "aggregate", "allowlist", "signed", "no prompt", "no trace"),
+        base=0.35, eff=0.22)
+    add("culture-tel-1", "evolve", "culture-telemetry", CT,
+        "A node wants to report which skills actually worked without exposing "
+        "implementation details. Design the schema.",
+        _mentions_any("aggregate", "anonymiz", "allowlist", "field", "schema", "signed"),
+        base=0.35, eff=0.22)
+
+    EC = "SKILL evolution-canary: monitor a recently auto-applied skill change during its canary period, auto-revert on regression."
+    add("evo-canary-0", "evolve", "evolution-canary", EC,
+        "A skill change was just auto-applied. Design the canary monitoring.",
+        _mentions_any("override rate", "eval score", "revert", "canary", "monitor",
+                      "threshold"), base=0.35, eff=0.22)
+    add("evo-canary-1", "evolve", "evolution-canary", EC,
+        "A canary is showing a regression right now. What's the automated response?",
+        _mentions_any("revert", "rollback", r"auto.?revert", "threshold", "regression"),
+        base=0.35, eff=0.22)
+
+    ECF = "SKILL evolution-conflict: resolve conflicts when multiple evolution triggers fire on the same skill simultaneously."
+    add("evo-conflict-0", "evolve", "evolution-conflict", ECF,
+        "Two evolution triggers fire on the same skill at once with opposing fixes. "
+        "Resolve it.",
+        _mentions_any("priority", "severity", "sequence", "conflict", "escalat",
+                      "contradict"), base=0.35, eff=0.22)
+    add("evo-conflict-1", "evolve", "evolution-conflict", ECF,
+        "Multiple pending changes target one skill file. Design the sequencing.",
+        _mentions_any("sequence", "priority", "order", "conflict", "merge"),
+        base=0.35, eff=0.22)
+
+    EM = "SKILL evolution-meta: tune the evolution mechanism's own thresholds based on evidence from past evolution cycles."
+    add("evo-meta-0", "evolve", "evolution-meta", EM,
+        "After 20 evolution cycles, the override-rate trigger fires too often on noise. "
+        "Tune it.",
+        _mentions_any("threshold", "tune", "calibrat", "trigger", "sensitivity"),
+        base=0.35, eff=0.22)
+    add("evo-meta-1", "evolve", "evolution-meta", EM,
+        "The evolution loop shows pathological behavior. Diagnose which parameter is "
+        "miscalibrated.",
+        _mentions_any("threshold", "trigger", "parameter", "calibrat", "cycle"),
+        base=0.35, eff=0.22)
+
+    EP = "SKILL evolution-propagate: propagate a promoted skill change beyond the local node - sync, PR, or commons contribution."
+    add("evo-prop-0", "evolve", "evolution-propagate", EP,
+        "A promoted skill change needs to reach other local projects. Design the "
+        "propagation.",
+        _mentions_any("sync", "pr", "ci", "gate", "propagat", "downstream"),
+        base=0.35, eff=0.22)
+    add("evo-prop-1", "evolve", "evolution-propagate", EP,
+        "A skill fix was reverted locally. How does that revert propagate downstream?",
+        _mentions_any("revert", "downstream", "propagat", "sync", "notify"),
+        base=0.35, eff=0.22)
+
+    ES = "SKILL evolution-scan: run a periodic sweep of routing logs and telemetry for trigger conditions, classify and dispatch."
+    add("evo-scan-0", "evolve", "evolution-scan", ES,
+        "Design a daily sweep that scans routing logs for skills needing attention.",
+        _mentions_any("override rate", "failure cluster", "scan", "trigger", "dispatch",
+                      "classify"), base=0.35, eff=0.22)
+    add("evo-scan-1", "evolve", "evolution-scan", ES,
+        "Classify a detected trigger by type and risk before dispatching a fix.",
+        _mentions_any("classify", "risk", "trigger", "dispatch", "severity"),
+        base=0.35, eff=0.22)
+
+    FH = "SKILL feedback-harvesting: systematically collect explicit and implicit feedback signals into a ranked improvement queue."
+    add("feedback-0", "evolve", "feedback-harvesting", FH,
+        "Users say \"no, don't do it that way\" but the correction evaporates. Capture it.",
+        _mentions_any("correction", "signal", "capture", "structure", "queue", "log"),
+        base=0.35, eff=0.22)
+    add("feedback-1", "evolve", "feedback-harvesting", FH,
+        "Design implicit feedback signals beyond explicit corrections - edits, overrides, "
+        "abandonment.",
+        _mentions_any("implicit", "edit", "override", "abandon", "signal"),
+        base=0.35, eff=0.22)
+
+    RT = "SKILL routing-tuner: turn skill-routing misfires and misses into gated edits to the routing table."
+    add("routing-tuner-0", "evolve", "routing-tuner", RT,
+        "Users keep overriding an AUTO-tier skill firing. Turn that into a routing table edit.",
+        _mentions_any("override rate", "tier", "gate", "edit", "routing table", "misfire"),
+        base=0.35, eff=0.22)
+    add("routing-tuner-1", "evolve", "routing-tuner", RT,
+        "A skill never fires when it should. Diagnose and fix the routing trigger.",
+        _mentions_any("trigger", "description", "miss", "routing table", "keyword"),
+        base=0.35, eff=0.22)
+
+    SIL = "SKILL self-improvement-loop: design a bounded self-improvement loop where an agent proposes changes to its own prompts/skills/memory, gated by evals."
+    add("self-improve-0", "evolve", "self-improvement-loop", SIL,
+        "Design a bounded loop where an agent proposes its own prompt fixes, gated by eval.",
+        _mentions_any("gate", "eval", "bound", "propose", "review", r"human"),
+        base=0.35, eff=0.22)
+    add("self-improve-1", "evolve", "self-improvement-loop", SIL,
+        "An always-on agent should learn from failures without a human rewriting it every "
+        "time. Design the guardrails.",
+        _mentions_any("gate", "eval", "bound", "approval", "review", "limit"),
+        base=0.35, eff=0.22)
+
+    SD = "SKILL skill-distillation: distill successful agent trajectories into new or improved skills - extract, generalize, validate."
+    add("skill-distill-0", "evolve", "skill-distillation", SD,
+        "An agent keeps re-deriving the same 3-step solution. Turn it into a reusable skill.",
+        _mentions_any("extract", "generaliz", "procedure", "distill", "reusable", "validate"),
+        base=0.35, eff=0.22)
+    add("skill-distill-1", "evolve", "skill-distillation", SD,
+        "A hard-won debugging session should become permanent capability. Design the "
+        "distillation.",
+        _mentions_any("extract", "generaliz", "procedure", "transfer", "validate"),
+        base=0.35, eff=0.22)
+
+    SMT = "SKILL skill-maintenance: keep a growing skill library healthy - prune dead skills, merge near-duplicates, fix overlapping triggers."
+    add("skill-maint-0", "evolve", "skill-maintenance", SMT,
+        "The skill library grew past 30 skills and two skills now fire on the same moment. "
+        "Fix it.",
+        _mentions_any("merge", "dedup", "overlap", "prune", "consolidat", "trigger"),
+        base=0.35, eff=0.22)
+    add("skill-maint-1", "evolve", "skill-maintenance", SMT,
+        "A skill hasn't triggered in 6 months. Decide whether to retire it.",
+        _mentions_any("retire", "prune", "stale", "deprecat", "remove"), base=0.35, eff=0.22)
+
+    # ---- ops/ ----
+    AI = "SKILL agent-incident: respond to a live agent misbehaving in production - contain blast radius, diagnose, remediate."
+    add("incident-0", "ops", "agent-incident", AI,
+        "An agent is sending the wrong emails right now in production. Respond.",
+        _mentions_any("contain", "kill", "disable", "stop", "blast radius", "rollback"),
+        base=0.35, eff=0.22)
+    add("incident-1", "ops", "agent-incident", AI,
+        "An agent is burning money in a loop right now. Contain it immediately.",
+        _mentions_any("kill", "stop", "circuit breaker", "cap", "disable", "contain"),
+        base=0.35, eff=0.22)
+
+    AO = "SKILL agent-observability: instrument a production agent - trace structure, the metrics that matter, cost/token accounting, alerts."
+    add("observ-0", "ops", "agent-observability", AO,
+        "Nobody can say what the agent did yesterday. Instrument it.",
+        _mentions_any("trace", "log", "metric", "span", "instrument"), base=0.35, eff=0.22)
+    add("observ-1", "ops", "agent-observability", AO,
+        "Debugging an agent requires re-running instead of reading traces. Fix the "
+        "instrumentation.",
+        _mentions_any("trace", "log", "record", "replay", "structured log"),
+        base=0.35, eff=0.22)
+
+    CG = "SKILL cost-governance: control agent spend at the org/fleet level - budgets, per-tenant quotas, spend caps, attribution."
+    add("cost-gov-0", "ops", "cost-governance", CG,
+        "Multiple tenants share one agent budget with no attribution. Design the controls.",
+        _mentions_any("quota", "budget", "attribut", r"cap", r"per.?tenant", "alert"),
+        base=0.35, eff=0.22)
+    add("cost-gov-1", "ops", "cost-governance", CG,
+        "An unexpected cost spike just happened. Design the anomaly alert.",
+        _mentions_any("alert", "anomaly", "threshold", "spike", "budget"), base=0.35, eff=0.22)
+
+    CO2 = "SKILL cost-optimization: reduce an agent's cost and latency without dropping quality - caching, model routing, context diet, batching."
+    add("cost-opt-0", "ops", "cost-optimization", CO2,
+        "An agent's LLM bill just spiked. Reduce cost without dropping quality.",
+        _mentions_any("cache", "route", "smaller model", "context", "batch", "token"),
+        base=0.35, eff=0.22)
+    add("cost-opt-1", "ops", "cost-optimization", CO2,
+        "Scale an agent 10x in traffic without 10x the cost.",
+        _mentions_any("cache", "batch", "route", "cheaper model", "context diet"),
+        base=0.35, eff=0.22)
+
+    DEP = "SKILL deployment: ship an agent change safely - shadow, canary, staged rollout, fast rollback gated on live metrics."
+    add("deploy-0", "ops", "deployment", DEP,
+        "Ship a risky prompt change to a production agent safely.",
+        _mentions_any("canary", "shadow", "staged", "rollback", "gradual", "gate"),
+        base=0.35, eff=0.22)
+    add("deploy-1", "ops", "deployment", DEP,
+        "A deploy just caused a regression. Design the fast rollback.",
+        _mentions_any("rollback", "revert", "canary", "gate", "metric"), base=0.35, eff=0.22)
+
+    HRE = "SKILL human-review-escalation: format a high-signal escalation when an agent must hand off to a human - context, what was tried, options."
+    add("human-esc-0", "ops", "human-review-escalation", HRE,
+        "An agent hits an unrecoverable error loop. Format the escalation to a human.",
+        _mentions_any("context", "tried", "blocker", "option", "escalat"), base=0.35, eff=0.22)
+    add("human-esc-1", "ops", "human-review-escalation", HRE,
+        "An agent faces a high-risk action (deletion, spend) with no clear policy. Design "
+        "the approval gate.",
+        _mentions_any("approval", "gate", "escalat", "option", "risk"), base=0.35, eff=0.22)
+
+    LO = "SKILL latency-optimization: reduce an agent's user-perceived latency - streaming, parallel tool calls, speculative work."
+    add("latency-0", "ops", "latency-optimization", LO,
+        "An agent feels slow to users. Reduce perceived latency.",
+        _mentions_any("stream", "parallel", "prefetch", "speculat", "p95", "first token"),
+        base=0.35, eff=0.22)
+    add("latency-1", "ops", "latency-optimization", LO,
+        "p95 latency is hurting the user experience. Fix it without losing quality.",
+        _mentions_any("p95", "parallel", "stream", "latency", "turn"), base=0.35, eff=0.22)
+
+    MM2 = "SKILL model-migration: move an agent to a new model generation without regressing - re-baseline evals, re-tune, roll out safely."
+    add("model-mig-0", "ops", "model-migration", MM2,
+        "Move an agent to a new model generation without regressing.",
+        _mentions_any(r"re.?baseline", "eval", r"re.?tune", "regression", "rollout"),
+        base=0.35, eff=0.22)
+    add("model-mig-1", "ops", "model-migration", MM2,
+        "A provider is deprecating the model behind an agent. Plan the migration.",
+        _mentions_any("eval", "baseline", "migrat", "rollout", "compare"), base=0.35, eff=0.22)
+
+    MR = "SKILL model-routing: route each request to the right model by difficulty, cost, latency, and a quality floor, with fallback."
+    add("model-route-0", "ops", "model-routing", MR,
+        "Route easy queries to a cheap model and hard ones to a frontier model.",
+        _mentions_any("route", "difficulty", "cost", "quality floor", "fallback", "cheap"),
+        base=0.35, eff=0.22)
+    add("model-route-1", "ops", "model-routing", MR,
+        "A chosen model fails or refuses mid-request. Design the fallback.",
+        _mentions_any("fallback", "failover", "retry", "route", "backup model"),
+        base=0.35, eff=0.22)
+
+    REL = "SKILL reliability-engineering: make an agent survive dependency failures - retries, fallbacks, circuit breakers, graceful degradation."
+    add("reliability-0", "ops", "reliability-engineering", REL,
+        "A tool dependency's failure takes down the whole agent. Fix it.",
+        _mentions_any("retry", "circuit breaker", "fallback", "degrad", "timeout"),
+        base=0.35, eff=0.22)
+    add("reliability-1", "ops", "reliability-engineering", REL,
+        "Transient API errors are surfacing directly to users. Add resilience.",
+        _mentions_any("retry", "backoff", "circuit breaker", "fallback"), base=0.35, eff=0.22)
+
+    # ---- safety/ ----
+    AGI = "SKILL agent-identity: design who an agent acts as and what it's authorized to do - delegated identity, per-user permissions, OAuth scope."
+    add("agent-identity-0", "safety", "agent-identity", AGI,
+        "An agent acts on behalf of many users with one shared API key. Fix the identity "
+        "model.",
+        _mentions_any("delegat", r"per.?user", "scope", "oauth", "permission", "identity"),
+        base=0.35, eff=0.22)
+    add("agent-identity-1", "safety", "agent-identity", AGI,
+        "Design against the confused-deputy problem, where an agent has broader access "
+        "than any one user should have.",
+        _mentions_any("confused deputy", "scope", "minimiz", "delegat", "permission"),
+        base=0.35, eff=0.22)
+
+    CM = "SKILL compliance-mapping: translate regulatory obligations (GDPR, CCPA, sector rules) into concrete agent controls and audit evidence."
+    add("compliance-0", "safety", "compliance-mapping", CM,
+        "An agent operates under GDPR. Map the obligation to a concrete control.",
+        _mentions_any("control", "evidence", "audit", "gdpr", "policy"), base=0.35, eff=0.22)
+    add("compliance-1", "safety", "compliance-mapping", CM,
+        "\"Are we compliant?\" has no evidenced answer right now. Fix that.",
+        _mentions_any("evidence", "control", "audit", "map", "policy"), base=0.35, eff=0.22)
+
+    OS = "SKILL output-safety: screen and constrain what an agent says or generates before it reaches a user."
+    add("output-safety-0", "safety", "output-safety", OS,
+        "An agent's generated response just caused a complaint. Screen future outputs.",
+        _mentions_any("filter", "classifier", "moderation", "screen", "block", "policy"),
+        base=0.35, eff=0.22)
+    add("output-safety-1", "safety", "output-safety", OS,
+        "Constrain an agent from giving unsafe advice before it reaches a user.",
+        _mentions_any("filter", "moderation", "screen", "policy", "block", "guard"),
+        base=0.35, eff=0.22)
+
+    PRIV = "SKILL privacy: classify and protect personal data an agent touches - PII inventory, minimization, redaction, retention, anonymization."
+    add("privacy-0", "safety", "privacy", PRIV,
+        "An agent's logs might carry personal data. Fix the telemetry before it leaks PII.",
+        _mentions_any("redact", "anonymiz", "pii", "minimiz", "mask", "scrub"),
+        base=0.35, eff=0.22)
+    add("privacy-1", "safety", "privacy", PRIV,
+        "Design the anonymization contract for anything that leaves this node.",
+        _mentions_any("anonymiz", r"k.?anonymity", "aggregate", "redact", "boundary"),
+        base=0.35, eff=0.22)
+
+    SP = "SKILL sandbox-policy: choose and configure the execution sandbox for agent-run code - isolation level, filesystem/network policy, limits."
+    add("sandbox-0", "safety", "sandbox-policy", SP,
+        "An agent is about to execute LLM-generated shell commands. Choose the isolation.",
+        _mentions_any("sandbox", "container", "gvisor", "seccomp", "isolat",
+                      "resource limit"), base=0.35, eff=0.22)
+    add("sandbox-1", "safety", "sandbox-policy", SP,
+        "Review an existing agent's code-execution isolation for escape risk.",
+        _mentions_any("escape", "isolat", "sandbox", "container", "network policy"),
+        base=0.35, eff=0.22)
+
+    SCV = "SKILL supply-chain-vetting: vet a third-party skill, MCP server, tool, or model before it runs in your agent - it executes in your context."
+    add("supply-chain-0", "safety", "supply-chain-vetting", SCV,
+        "Vet a third-party MCP server before installing it - it executes its instructions "
+        "in your context.",
+        _mentions_any("review", "audit", "permission", "sandbox", "vet", "trust"),
+        base=0.35, eff=0.22)
+    add("supply-chain-1", "safety", "supply-chain-vetting", SCV,
+        "A community skill pack is being adopted. What do you check before trusting it?",
+        _mentions_any("review", "audit", "source", "permission", "vet"), base=0.35, eff=0.22)
+
     return T
 
 
@@ -666,6 +1167,285 @@ FIXTURES: Dict[str, Tuple[str, str]] = {
     "guardrails-4": ("Use a canary/staged rollout with automatic rollback, requiring approval "
                      "before promoting to full production.",
                      "The agent should double-check its Kubernetes changes before applying them."),
+
+    # ---- first-ever fixtures for the 47 newly-covered skills (EXP-019) ----
+    "agent-arch-0": ("Design this as a multi-agent system with a coordinator handing off to "
+                     "specialized sub-agents for refunds, inventory, and fraud.",
+                     "Just build one agent and have it do everything."),
+    "agent-arch-1": ("Split the agent into specialized sub-agents and route each tool call "
+                     "to the right one via handoff.",
+                     "Add more instructions to the prompt telling it to be more careful."),
+    "handoff-0": ("The handoff message needs a schema containing the task, relevant context, "
+                  "current state, and where to return the result.",
+                  "Just have them talk to each other."),
+    "handoff-1": ("Give both sub-agents access to shared state so they can coordinate and "
+                  "avoid duplicating the same handoff.",
+                  "Tell them to be more careful."),
+    "req-interro-0": ("Ask a structured interview question first: who is this for, what's "
+                      "the success criteria, and what's the scope and constraints?",
+                      "Just start building it and see what happens."),
+    "req-interro-1": ("Interview the stakeholder one question at a time to pin down the "
+                      "scope, constraints, and success criteria.",
+                      "Guess at reasonable defaults and move forward."),
+    "mcp-0": ("Choose stdio or HTTP+SSE transport, and use OAuth for auth on the CRM API.",
+             "Just wrap the API and ship it."),
+    "mcp-1": ("Check the tool schema and transport protocol config, and look at stderr "
+             "logging for auth timeout errors.",
+             "Restart the server and try again."),
+    "memory-0": ("Set a TTL with decay so old memories expire, and prune or summarize into "
+                "a retention tier.",
+                "Just store everything forever."),
+    "memory-1": ("Rank retrieved memories by recency and relevance score, and invalidate "
+                "stale entries.",
+                "Retrieve more memories to be safe."),
+    "multimodal-0": ("Use OCR/vision preprocessing to extract structured table data instead "
+                     "of raw text parsing.",
+                     "Just ask the model to read the PDF more carefully."),
+    "multimodal-1": ("Downsample and resize images to cap resolution, and cache repeated "
+                     "image tokens against the budget.",
+                     "Just send the images at full size every time."),
+    "retrieval-0": ("Rework the chunking and embedding index, then rerank by relevance to "
+                    "the query.",
+                    "Retrieve more documents to be safe."),
+    "retrieval-1": ("Cap retrieval to top-k results with a limit, rerank, and truncate to "
+                    "the context budget.",
+                    "Just send everything retrieved to the model."),
+    "skill-author-0": ("Fix the description's trigger keywords and add a concrete 'when to "
+                       "use' example.",
+                       "The skill file just needs to be longer."),
+    "skill-author-1": ("Narrow the trigger description and add a 'when not to use' section "
+                       "to scope it correctly.",
+                       "Delete the skill and start over."),
+    "state-mgmt-0": ("Add checkpointing so the agent can persist state and resume "
+                     "idempotently after a crash.",
+                     "Just tell it to try again from the beginning."),
+    "state-mgmt-1": ("Checkpoint state, pause for human-in-the-loop approval, and resume "
+                     "from the same checkpoint.",
+                     "Just have it sleep for a bit and continue on its own."),
+    "agent-cr-0": ("Check the prompt diff for eval regressions, token/cost impact, and "
+                   "increased non-determinism.",
+                   "Looks fine, approve it."),
+    "agent-cr-1": ("Check the tool's schema for enum constraints, its permission scope and "
+                   "blast radius, and run the eval suite.",
+                   "Looks fine, approve it."),
+    "scaffold-0": ("Set up the eval stub, config, observability hooks, and project structure "
+                   "before the dev loop starts.",
+                   "Just start writing the prompt."),
+    "scaffold-1": ("Separate the agent into a modular layout with clear config and structure "
+                   "boundaries.",
+                   "Just keep adding files wherever convenient."),
+    "onboard-0": ("Map the prompt, tools, control loop, config, and eval traces first.",
+                 "Just start reading the whole codebase top to bottom."),
+    "onboard-1": ("Show them the entry point, the prompt and tools, and walk through a trace "
+                 "of the request flow.",
+                 "Tell them to read the README."),
+    "replay-0": ("Record the trace and replay it locally to reproduce the bad interaction "
+                "from the log.",
+                "Ask the user what happened."),
+    "replay-1": ("Record and snapshot the run once, then replay it locally with a mock "
+                "instead of re-running live.",
+                "Just run it again and hope it's faster this time."),
+    "prompt-exp-0": ("Set up an A/B test with prompt variants against a fixed held-out task "
+                     "set and one metric, compared to baseline.",
+                     "Just switch to the new wording, it feels better."),
+    "prompt-exp-1": ("Run both variants against the same fixed task set and check if the "
+                     "metric difference from baseline is significant.",
+                     "Pick whichever one reads better."),
+    "testing-erg-0": ("```python\ndef test_agent():\n    mock_model = FakeModel()\n    "
+                      "assert mock_model.run() == expected\n```",
+                      "Just run the tests against the real API each time."),
+    "testing-erg-1": ("```python\ndef test_tool():\n    return mock_api_call()\n```",
+                      "Manually click through the UI to test it."),
+    "adv-review-0": ("Spawn a fresh-context adversarial reviewer whose job is to disprove "
+                     "the design and attack its assumptions, like a red team.",
+                     "It looks solid to me, ship it."),
+    "adv-review-1": ("Run an independent, fresh adversarial review biased to disprove the "
+                     "decision before it ships.",
+                     "The team already agreed, so it's fine."),
+    "llm-judge-0": ("Write a rubric with named criteria and calibrate the judge's score "
+                    "against pairwise comparisons, controlling for bias.",
+                    "Just ask the model if the summary is good."),
+    "llm-judge-1": ("Calibrate the judge against human-labeled examples and measure "
+                    "agreement with kappa.",
+                    "The judge is probably fine, don't worry about it."),
+    "model-card-0": ("Document the agent's capabilities, limitations, intended use, and "
+                     "evaluated performance in a model card.",
+                     "It works, that's all people need to know."),
+    "model-card-1": ("Write a model card documenting its evaluated capabilities and "
+                     "limitations.",
+                     "Ask around if anyone remembers what it does."),
+    "traj-review-0": ("Read the trace backward from the failure to find the first "
+                      "divergence step and its root cause taxonomy.",
+                      "Just rerun it and see if it happens again."),
+    "traj-review-1": ("Cluster the traces by failure pattern to find the systematic "
+                      "divergence taxonomy.",
+                      "Each failure is probably a one-off, don't worry about it."),
+    "verifier-design-0": ("The registrar's keyword list is too narrow and doesn't recognize "
+                          "code as a checkable proxy for the answer, causing a false negative.",
+                          "The model just didn't follow instructions correctly."),
+    "verifier-design-1": ("Read the raw completion transcripts first, and check the "
+                          "registrar against a should-pass and should-fail fixture before "
+                          "trusting the result.",
+                          "Trust the number, it's probably a real regression."),
+    "culture-tel-0": ("Publish only anonymized, signed aggregate counts from an allowlist "
+                      "of fields - no prompt or trace ever leaves the node.",
+                      "Just upload the full routing logs, it's easier."),
+    "culture-tel-1": ("Design an allowlisted, signed schema of aggregate fields for the "
+                      "report.",
+                      "Send the raw session data, we'll figure out privacy later."),
+    "evo-canary-0": ("Monitor the canary's override rate and eval score against a "
+                     "threshold, auto-reverting if it regresses.",
+                     "It's probably fine, check back next week."),
+    "evo-canary-1": ("Auto-revert the canary immediately since the regression crossed the "
+                     "rollback threshold.",
+                     "Let's wait and see if it recovers on its own."),
+    "evo-conflict-0": ("Resolve the conflict by priority and severity, sequencing the fixes, "
+                       "and escalate if they contradict each other.",
+                       "Apply whichever one was submitted first."),
+    "evo-conflict-1": ("Sequence the conflicting changes by priority order, or merge them "
+                       "if compatible.",
+                       "Just apply both and see what happens."),
+    "evo-meta-0": ("Tune the trigger threshold and calibrate its sensitivity based on the "
+                   "last 20 cycles.",
+                   "Leave it as-is, it was fine when we set it."),
+    "evo-meta-1": ("Recalibrate the trigger parameter and threshold based on evidence from "
+                   "past cycles.",
+                   "The loop is probably just unlucky this time."),
+    "evo-prop-0": ("Propagate the change downstream by syncing it and opening a PR gated "
+                   "on CI.",
+                   "Email the other teams and tell them about it."),
+    "evo-prop-1": ("Propagate and sync the revert downstream, notifying affected projects.",
+                   "The other teams will probably notice eventually."),
+    "evo-scan-0": ("Scan the routing log daily for override rate spikes and failure "
+                   "clusters, classify each trigger, and dispatch it.",
+                   "Check the logs manually once in a while."),
+    "evo-scan-1": ("Classify the trigger by risk and severity before dispatching the "
+                   "appropriate fix.",
+                   "Just apply a generic fix to whatever seems wrong."),
+    "feedback-0": ("Capture the correction as a structured signal in a log and add it to "
+                   "the improvement queue.",
+                   "It's probably not important, move on."),
+    "feedback-1": ("Track implicit signals too - edits, overrides, and abandonment - not "
+                   "just explicit corrections.",
+                   "Only explicit feedback matters."),
+    "routing-tuner-0": ("The override rate shows a routing misfire - edit the routing table "
+                        "to fix the tier and gate.",
+                        "Users will get used to it eventually."),
+    "routing-tuner-1": ("The trigger description is missing the right keywords - fix the "
+                        "routing table entry.",
+                        "Maybe the model just isn't smart enough."),
+    "self-improve-0": ("Bound the loop so the agent proposes fixes that are gated on eval "
+                       "and human review before applying.",
+                       "Let it change its own prompt automatically, it'll be fine."),
+    "self-improve-1": ("Limit and gate the self-improvement loop with eval and approval "
+                       "review at each step.",
+                       "Just let it learn freely without any checks."),
+    "skill-distill-0": ("Extract and generalize the repeated procedure into a reusable "
+                        "skill, then validate it transfers.",
+                        "It's a one-off, not worth turning into a skill."),
+    "skill-distill-1": ("Extract the procedure, generalize it, and validate that it "
+                        "transfers to similar tasks.",
+                        "Just remember to do it that way next time."),
+    "skill-maint-0": ("Merge and dedup the two overlapping skills, consolidating their "
+                      "triggers.",
+                      "Just add a comment saying which one to use."),
+    "skill-maint-1": ("Retire the stale skill and prune it since it hasn't fired in 6 "
+                      "months.",
+                      "Leave it, it might be useful someday."),
+    "incident-0": ("Kill the agent immediately to contain the blast radius, then roll back "
+                   "the change that caused it.",
+                   "Let's monitor it for a bit longer."),
+    "incident-1": ("Kill the loop with a circuit breaker and spending cap to contain it "
+                   "right now.",
+                   "It'll probably settle down on its own soon."),
+    "observ-0": ("Instrument the agent with structured traces, spans, and metrics logging.",
+                "Just ask the team what usually happens."),
+    "observ-1": ("Add structured trace logging so you can read what happened instead of "
+                "replaying it live.",
+                "Just re-run it whenever there's an issue."),
+    "cost-gov-0": ("Set a per-tenant quota and spend cap with budget attribution and an "
+                   "alert on overage.",
+                   "We'll just keep an eye on the total bill."),
+    "cost-gov-1": ("Set an anomaly alert that fires when spend crosses a spike threshold "
+                   "against budget.",
+                   "It was probably a one-time fluke."),
+    "cost-opt-0": ("Cache repeated calls, route simple requests to a smaller model, batch "
+                   "requests, and trim the context to cut tokens.",
+                   "Just ask people to use it less."),
+    "cost-opt-1": ("Cache, batch, and route to a cheaper model where possible, plus a "
+                   "context diet.",
+                   "We'll deal with it when the bill comes."),
+    "deploy-0": ("Ship it as a shadow or canary deploy with a gradual staged rollout gated "
+                "on live metrics, with rollback ready.",
+                "Just push it to everyone at once, it's probably fine."),
+    "deploy-1": ("Roll back immediately and revert to the last canary-gated version that "
+                "passed the metric check.",
+                "Let's wait and see if it fixes itself."),
+    "human-esc-0": ("Escalate with the context, what was already tried, the exact blocker, "
+                    "and the available options.",
+                    "Just say 'it's stuck, help.'"),
+    "human-esc-1": ("Gate the high-risk action behind explicit human approval, escalating "
+                    "with the options and risk.",
+                    "Just let it proceed, it's probably fine."),
+    "latency-0": ("Stream the response, parallelize tool calls, and prefetch speculatively "
+                  "to cut time to first token.",
+                  "Tell users the agent is just slow sometimes."),
+    "latency-1": ("Reduce p95 latency per turn by streaming and parallelizing the tool "
+                  "calls.",
+                  "Add a loading spinner so it feels faster."),
+    "model-mig-0": ("Re-baseline the evals, re-tune the prompt for the new model, and check "
+                    "for regressions before rollout.",
+                    "Just swap the model string and ship it."),
+    "model-mig-1": ("Compare the new model against the eval baseline before completing the "
+                    "migration rollout.",
+                    "The new model is probably better anyway."),
+    "model-route-0": ("Route by difficulty - cheap model for easy queries, frontier model "
+                      "for hard ones, with a quality floor and fallback.",
+                      "Use the same model for everything, it's simpler."),
+    "model-route-1": ("Add a fallback and failover to a backup model with retry when the "
+                      "primary model fails or refuses.",
+                      "Just show the user an error message."),
+    "reliability-0": ("Add retries, a circuit breaker, a fallback, and graceful degradation "
+                      "with a timeout.",
+                      "The dependency is usually reliable, don't worry about it."),
+    "reliability-1": ("Add retry with exponential backoff and a circuit breaker fallback "
+                      "for transient errors.",
+                      "Just show the raw error to the user."),
+    "agent-identity-0": ("Use per-user delegated identity with scoped OAuth permissions "
+                         "instead of one shared API key.",
+                         "The shared key is fine, just rotate it occasionally."),
+    "agent-identity-1": ("Minimize scope and use delegated permissions per user to avoid "
+                         "the confused-deputy problem.",
+                         "Give the agent broad access so it never gets stuck."),
+    "compliance-0": ("Map the GDPR obligation to a concrete control with audit evidence "
+                     "and a documented policy.",
+                     "We're probably fine, that regulation is mostly about cookies."),
+    "compliance-1": ("Map each policy requirement to a control with audit evidence.",
+                     "Ask legal if it ever comes up."),
+    "output-safety-0": ("Add a moderation classifier to screen and filter outputs against "
+                        "policy before they reach the user, blocking violations.",
+                        "Just tell it to be nicer in the prompt."),
+    "output-safety-1": ("Screen outputs through a moderation filter and guard against "
+                        "policy violations before sending.",
+                        "Trust the model to behave."),
+    "privacy-0": ("Redact and mask PII in the logs, minimizing what gets scrubbed into "
+                  "telemetry.",
+                  "Logs are internal only, it's fine."),
+    "privacy-1": ("Anonymize with a k-anonymity floor and only send redacted aggregate "
+                  "data across the boundary.",
+                  "Just encrypt it, that should be enough."),
+    "sandbox-0": ("Run it in a gVisor or seccomp-restricted sandboxed container with "
+                  "isolation and resource limits.",
+                  "Just run it directly, we trust the model."),
+    "sandbox-1": ("Review the sandbox container's isolation and network policy for escape "
+                  "risk.",
+                  "It's probably fine, nothing bad has happened yet."),
+    "supply-chain-0": ("Vet and audit the MCP server's permissions in a sandbox before "
+                       "granting it trust.",
+                       "It has a lot of GitHub stars, it's probably fine."),
+    "supply-chain-1": ("Review the source and audit its requested permissions before "
+                       "vetting it for adoption.",
+                       "Everyone else is using it already."),
 }
 
 
