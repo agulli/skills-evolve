@@ -1,0 +1,685 @@
+{
+ "generated": "2026-07-24",
+ "n_skills": 61,
+ "n_win_fdr": 24,
+ "n_loss": 0,
+ "n_ceiling": 14,
+ "haiku_covered": 29,
+ "effects": [
+  {
+   "skill": "accretion-refactor",
+   "effect": -0.007,
+   "lo": -0.036,
+   "hi": 0.023,
+   "verdict": "nsig"
+  },
+  {
+   "skill": "adversarial-review",
+   "effect": 0.033,
+   "lo": -0.012,
+   "hi": 0.079,
+   "verdict": "nsig"
+  },
+  {
+   "skill": "agent-architecture",
+   "effect": 0.017,
+   "lo": -0.016,
+   "hi": 0.049,
+   "verdict": "nsig"
+  },
+  {
+   "skill": "agent-code-review",
+   "effect": 0.0,
+   "lo": 0.0,
+   "hi": 0.0,
+   "verdict": "ceiling"
+  },
+  {
+   "skill": "agent-identity",
+   "effect": 0.383,
+   "lo": 0.26,
+   "hi": 0.506,
+   "verdict": "win"
+  },
+  {
+   "skill": "agent-incident",
+   "effect": 0.333,
+   "lo": 0.156,
+   "hi": 0.51,
+   "verdict": "win"
+  },
+  {
+   "skill": "agent-observability",
+   "effect": 0.0,
+   "lo": 0.0,
+   "hi": 0.0,
+   "verdict": "ceiling"
+  },
+  {
+   "skill": "agent-scaffolding",
+   "effect": -0.1,
+   "lo": -0.236,
+   "hi": 0.036,
+   "verdict": "nsig"
+  },
+  {
+   "skill": "codebase-onboarding",
+   "effect": 0.433,
+   "lo": 0.308,
+   "hi": 0.559,
+   "verdict": "win"
+  },
+  {
+   "skill": "compliance-mapping",
+   "effect": 0.033,
+   "lo": -0.012,
+   "hi": 0.079,
+   "verdict": "nsig"
+  },
+  {
+   "skill": "context-degradation",
+   "effect": 0.117,
+   "lo": 0.035,
+   "hi": 0.198,
+   "verdict": "win"
+  },
+  {
+   "skill": "context-engineering",
+   "effect": 0.004,
+   "lo": -0.004,
+   "hi": 0.012,
+   "verdict": "nsig"
+  },
+  {
+   "skill": "cost-governance",
+   "effect": 0.0,
+   "lo": 0.0,
+   "hi": 0.0,
+   "verdict": "ceiling"
+  },
+  {
+   "skill": "cost-optimization",
+   "effect": 0.05,
+   "lo": -0.005,
+   "hi": 0.105,
+   "verdict": "nsig"
+  },
+  {
+   "skill": "culture-telemetry",
+   "effect": 0.0,
+   "lo": 0.0,
+   "hi": 0.0,
+   "verdict": "ceiling"
+  },
+  {
+   "skill": "deployment",
+   "effect": 0.033,
+   "lo": -0.012,
+   "hi": 0.079,
+   "verdict": "nsig"
+  },
+  {
+   "skill": "eval-harness",
+   "effect": 0.227,
+   "lo": 0.16,
+   "hi": 0.294,
+   "verdict": "win"
+  },
+  {
+   "skill": "evolution-canary",
+   "effect": 0.183,
+   "lo": 0.085,
+   "hi": 0.281,
+   "verdict": "win"
+  },
+  {
+   "skill": "evolution-conflict",
+   "effect": 0.017,
+   "lo": -0.016,
+   "hi": 0.049,
+   "verdict": "nsig"
+  },
+  {
+   "skill": "evolution-meta",
+   "effect": 0.117,
+   "lo": 0.035,
+   "hi": 0.198,
+   "verdict": "win"
+  },
+  {
+   "skill": "evolution-propagate",
+   "effect": 0.1,
+   "lo": 0.024,
+   "hi": 0.176,
+   "verdict": "win"
+  },
+  {
+   "skill": "evolution-scan",
+   "effect": 0.0,
+   "lo": 0.0,
+   "hi": 0.0,
+   "verdict": "ceiling"
+  },
+  {
+   "skill": "feedback-harvesting",
+   "effect": 0.0,
+   "lo": 0.0,
+   "hi": 0.0,
+   "verdict": "ceiling"
+  },
+  {
+   "skill": "grounding-citation",
+   "effect": 0.167,
+   "lo": 0.058,
+   "hi": 0.275,
+   "verdict": "win"
+  },
+  {
+   "skill": "guardrails",
+   "effect": 0.147,
+   "lo": 0.05,
+   "hi": 0.243,
+   "verdict": "win"
+  },
+  {
+   "skill": "handoff-protocol",
+   "effect": 0.033,
+   "lo": -0.012,
+   "hi": 0.079,
+   "verdict": "nsig"
+  },
+  {
+   "skill": "human-review-escalation",
+   "effect": 0.017,
+   "lo": -0.016,
+   "hi": 0.049,
+   "verdict": "nsig"
+  },
+  {
+   "skill": "injection-audit",
+   "effect": 0.15,
+   "lo": 0.013,
+   "hi": 0.287,
+   "verdict": "nsig"
+  },
+  {
+   "skill": "latency-optimization",
+   "effect": 0.05,
+   "lo": -0.005,
+   "hi": 0.105,
+   "verdict": "nsig"
+  },
+  {
+   "skill": "llm-judge",
+   "effect": 0.0,
+   "lo": 0.0,
+   "hi": 0.0,
+   "verdict": "ceiling"
+  },
+  {
+   "skill": "local-replay",
+   "effect": -0.05,
+   "lo": -0.158,
+   "hi": 0.058,
+   "verdict": "nsig"
+  },
+  {
+   "skill": "long-horizon-brief",
+   "effect": 0.6,
+   "lo": 0.468,
+   "hi": 0.732,
+   "verdict": "win"
+  },
+  {
+   "skill": "mcp-server",
+   "effect": 0.1,
+   "lo": 0.024,
+   "hi": 0.176,
+   "verdict": "win"
+  },
+  {
+   "skill": "memory-design",
+   "effect": 0.05,
+   "lo": -0.005,
+   "hi": 0.105,
+   "verdict": "nsig"
+  },
+  {
+   "skill": "model-card",
+   "effect": 0.067,
+   "lo": 0.004,
+   "hi": 0.13,
+   "verdict": "nsig"
+  },
+  {
+   "skill": "model-migration",
+   "effect": 0.0,
+   "lo": 0.0,
+   "hi": 0.0,
+   "verdict": "ceiling"
+  },
+  {
+   "skill": "model-routing",
+   "effect": 0.0,
+   "lo": 0.0,
+   "hi": 0.0,
+   "verdict": "ceiling"
+  },
+  {
+   "skill": "multimodal",
+   "effect": 0.0,
+   "lo": 0.0,
+   "hi": 0.0,
+   "verdict": "ceiling"
+  },
+  {
+   "skill": "output-safety",
+   "effect": 0.017,
+   "lo": -0.016,
+   "hi": 0.049,
+   "verdict": "nsig"
+  },
+  {
+   "skill": "privacy",
+   "effect": 0.0,
+   "lo": 0.0,
+   "hi": 0.0,
+   "verdict": "ceiling"
+  },
+  {
+   "skill": "prompt-architecture",
+   "effect": 0.006,
+   "lo": -0.005,
+   "hi": 0.016,
+   "verdict": "nsig"
+  },
+  {
+   "skill": "prompt-experimentation",
+   "effect": 0.2,
+   "lo": 0.08,
+   "hi": 0.32,
+   "verdict": "win"
+  },
+  {
+   "skill": "reliability-engineering",
+   "effect": 0.5,
+   "lo": 0.373,
+   "hi": 0.627,
+   "verdict": "win"
+  },
+  {
+   "skill": "requirements-interrogation",
+   "effect": -0.033,
+   "lo": -0.136,
+   "hi": 0.07,
+   "verdict": "nsig"
+  },
+  {
+   "skill": "retrieval-design",
+   "effect": 0.0,
+   "lo": 0.0,
+   "hi": 0.0,
+   "verdict": "ceiling"
+  },
+  {
+   "skill": "routing-tuner",
+   "effect": 0.2,
+   "lo": 0.099,
+   "hi": 0.301,
+   "verdict": "win"
+  },
+  {
+   "skill": "sandbox-policy",
+   "effect": 0.233,
+   "lo": 0.126,
+   "hi": 0.34,
+   "verdict": "win"
+  },
+  {
+   "skill": "secrets-management",
+   "effect": 0.621,
+   "lo": 0.559,
+   "hi": 0.682,
+   "verdict": "win"
+  },
+  {
+   "skill": "self-improvement-loop",
+   "effect": 0.35,
+   "lo": 0.229,
+   "hi": 0.471,
+   "verdict": "win"
+  },
+  {
+   "skill": "silent-failure-audit",
+   "effect": 0.193,
+   "lo": 0.13,
+   "hi": 0.257,
+   "verdict": "win"
+  },
+  {
+   "skill": "skill-authoring",
+   "effect": 0.017,
+   "lo": -0.016,
+   "hi": 0.049,
+   "verdict": "nsig"
+  },
+  {
+   "skill": "skill-distillation",
+   "effect": 0.533,
+   "lo": 0.407,
+   "hi": 0.66,
+   "verdict": "win"
+  },
+  {
+   "skill": "skill-maintenance",
+   "effect": 0.2,
+   "lo": 0.099,
+   "hi": 0.301,
+   "verdict": "win"
+  },
+  {
+   "skill": "state-management",
+   "effect": 0.0,
+   "lo": 0.0,
+   "hi": 0.0,
+   "verdict": "ceiling"
+  },
+  {
+   "skill": "supply-chain-vetting",
+   "effect": 0.067,
+   "lo": 0.004,
+   "hi": 0.13,
+   "verdict": "nsig"
+  },
+  {
+   "skill": "synthetic-task-generation",
+   "effect": 0.1,
+   "lo": -0.007,
+   "hi": 0.207,
+   "verdict": "nsig"
+  },
+  {
+   "skill": "testing-ergonomics",
+   "effect": 0.0,
+   "lo": 0.0,
+   "hi": 0.0,
+   "verdict": "ceiling"
+  },
+  {
+   "skill": "tool-adversarial-reading",
+   "effect": 0.511,
+   "lo": 0.438,
+   "hi": 0.584,
+   "verdict": "win"
+  },
+  {
+   "skill": "tool-design",
+   "effect": 0.833,
+   "lo": 0.767,
+   "hi": 0.9,
+   "verdict": "win"
+  },
+  {
+   "skill": "trajectory-review",
+   "effect": 0.433,
+   "lo": 0.264,
+   "hi": 0.602,
+   "verdict": "win"
+  },
+  {
+   "skill": "verifier-design",
+   "effect": 0.1,
+   "lo": -0.058,
+   "hi": 0.258,
+   "verdict": "nsig"
+  }
+ ],
+ "cross": [
+  {
+   "skill": "accretion-refactor",
+   "haiku": 0.0,
+   "gemini": -0.007,
+   "cat": "neither"
+  },
+  {
+   "skill": "agent-architecture",
+   "haiku": 0.083,
+   "gemini": 0.017,
+   "cat": "neither"
+  },
+  {
+   "skill": "agent-code-review",
+   "haiku": 0.0,
+   "gemini": 0.0,
+   "cat": "neither"
+  },
+  {
+   "skill": "agent-scaffolding",
+   "haiku": 0.017,
+   "gemini": -0.1,
+   "cat": "neither"
+  },
+  {
+   "skill": "codebase-onboarding",
+   "haiku": 0.0,
+   "gemini": 0.433,
+   "cat": "one"
+  },
+  {
+   "skill": "context-degradation",
+   "haiku": 0.017,
+   "gemini": 0.117,
+   "cat": "one"
+  },
+  {
+   "skill": "context-engineering",
+   "haiku": 0.1,
+   "gemini": 0.004,
+   "cat": "one"
+  },
+  {
+   "skill": "eval-harness",
+   "haiku": 0.127,
+   "gemini": 0.227,
+   "cat": "both"
+  },
+  {
+   "skill": "grounding-citation",
+   "haiku": 0.2,
+   "gemini": 0.167,
+   "cat": "both"
+  },
+  {
+   "skill": "guardrails",
+   "haiku": 0.0,
+   "gemini": 0.147,
+   "cat": "one"
+  },
+  {
+   "skill": "handoff-protocol",
+   "haiku": 0.017,
+   "gemini": 0.033,
+   "cat": "neither"
+  },
+  {
+   "skill": "injection-audit",
+   "haiku": -0.083,
+   "gemini": 0.15,
+   "cat": "neither"
+  },
+  {
+   "skill": "local-replay",
+   "haiku": 0.033,
+   "gemini": -0.05,
+   "cat": "neither"
+  },
+  {
+   "skill": "long-horizon-brief",
+   "haiku": 0.3,
+   "gemini": 0.6,
+   "cat": "both"
+  },
+  {
+   "skill": "mcp-server",
+   "haiku": 0.0,
+   "gemini": 0.1,
+   "cat": "one"
+  },
+  {
+   "skill": "memory-design",
+   "haiku": 0.05,
+   "gemini": 0.05,
+   "cat": "neither"
+  },
+  {
+   "skill": "multimodal",
+   "haiku": 0.0,
+   "gemini": 0.0,
+   "cat": "neither"
+  },
+  {
+   "skill": "prompt-architecture",
+   "haiku": 0.028,
+   "gemini": 0.006,
+   "cat": "neither"
+  },
+  {
+   "skill": "prompt-experimentation",
+   "haiku": 0.0,
+   "gemini": 0.2,
+   "cat": "one"
+  },
+  {
+   "skill": "requirements-interrogation",
+   "haiku": -0.067,
+   "gemini": -0.033,
+   "cat": "neither"
+  },
+  {
+   "skill": "retrieval-design",
+   "haiku": 0.0,
+   "gemini": 0.0,
+   "cat": "neither"
+  },
+  {
+   "skill": "secrets-management",
+   "haiku": 0.121,
+   "gemini": 0.621,
+   "cat": "both"
+  },
+  {
+   "skill": "silent-failure-audit",
+   "haiku": 0.0,
+   "gemini": 0.193,
+   "cat": "one"
+  },
+  {
+   "skill": "skill-authoring",
+   "haiku": 0.0,
+   "gemini": 0.017,
+   "cat": "neither"
+  },
+  {
+   "skill": "state-management",
+   "haiku": 0.0,
+   "gemini": 0.0,
+   "cat": "neither"
+  },
+  {
+   "skill": "synthetic-task-generation",
+   "haiku": 0.033,
+   "gemini": 0.1,
+   "cat": "neither"
+  },
+  {
+   "skill": "testing-ergonomics",
+   "haiku": 0.0,
+   "gemini": 0.0,
+   "cat": "neither"
+  },
+  {
+   "skill": "tool-adversarial-reading",
+   "haiku": 0.072,
+   "gemini": 0.511,
+   "cat": "both"
+  },
+  {
+   "skill": "tool-design",
+   "haiku": 0.975,
+   "gemini": 0.833,
+   "cat": "both"
+  }
+ ],
+ "retract": [
+  {
+   "skill": "context-engineering",
+   "model": "Haiku",
+   "before": -0.341,
+   "after": 0.113
+  },
+  {
+   "skill": "context-engineering",
+   "model": "Gemini",
+   "before": -0.366,
+   "after": 0.0
+  },
+  {
+   "skill": "accretion-refactor",
+   "model": "Haiku",
+   "before": -0.133,
+   "after": -0.013
+  },
+  {
+   "skill": "eval-harness",
+   "model": "Gemini",
+   "before": -0.133,
+   "after": 0.287
+  },
+  {
+   "skill": "silent-failure-audit",
+   "model": "Haiku",
+   "before": -0.073,
+   "after": 0.0
+  },
+  {
+   "skill": "requirements-interrogation",
+   "model": "Gemini",
+   "before": -0.633,
+   "after": -0.033
+  },
+  {
+   "skill": "culture-telemetry",
+   "model": "Gemini",
+   "before": -0.417,
+   "after": 0.0
+  }
+ ],
+ "adversarial": {
+  "sybil": [
+   0,
+   4,
+   8,
+   16,
+   24
+  ],
+  "uncapped": [
+   0,
+   0,
+   0,
+   0,
+   6
+  ],
+  "capped": [
+   0,
+   0,
+   0,
+   0,
+   3
+  ]
+ },
+ "router": {
+  "haiku_top1": 92.3,
+  "gemini_top1": 92.3,
+  "false_fire": 0.0
+ }
+}
