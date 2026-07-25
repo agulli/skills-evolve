@@ -1,0 +1,29 @@
+{
+  "model": "gemini",
+  "mode": "real",
+  "skill_effects": {
+    "retrieval-design": {
+      "effect": 0.0,
+      "n_paired": 90,
+      "with_pass": 1.0,
+      "without_pass": 1.0,
+      "effect_ci95": [
+        0.0,
+        0.0
+      ],
+      "significant": false,
+      "direction": "unclear"
+    }
+  },
+  "eval_false_positive_rate": 0.0,
+  "eval_sensitivity": 0.956,
+  "n_tasks": 3,
+  "runs": 30,
+  "truncated": false,
+  "spend_usd": 0.0245,
+  "calls": 270,
+  "tokens": {
+    "in": 49709,
+    "out": 48842
+  }
+}

@@ -18,15 +18,15 @@ from two vendors, deliberately (cross-vendor confirmation is the whole point of 
 
 | # | Claim | Verdict | One-line result |
 |---|-------|---------|-----------------|
-| 1 | Skills are useful | 🟡 PARTIAL | **0 confirmed-harmful skills on either model** (FDR-corrected). 24/61 Gemini wins; 6 confirmed on *both* models. Gap: single-turn tasks; 49 skills at first-pass depth. |
+| 1 | Skills are useful | 🟡 PARTIAL | **0 confirmed-harmful skills on either model** (FDR-corrected). 31/61 Gemini wins; 6 confirmed on *both* models. Gap: single-turn tasks; 47 skills at first-pass depth; 4 skills still ceiling-locked. |
 | 2 | Router works | ✅ PROVEN | **92.3% top-1 on both models, 0% false-fire** on negative controls. Gap: self-authored queries; tier/compound-chain accuracy untested. |
-| 3 | Eval is robust | ✅ PROVEN | 159/159 fixtures gate every run; **all replication CIs overlap** across independent samples; 5 registrar artifacts caught & retracted, none shipped. Gap: most registrars keyword-class. |
-| 4 | Local evolution works | ✅ PROVEN | End-to-end scan→canary→decide loop with a **real gate (promotes AND reverts)**; Layer A on real data hits **precision/recall 1.0**. Gap: run on demo logs, not a production routing log yet. |
+| 3 | Eval is robust | ✅ PROVEN | 174/174 fixtures gate every run; **all replication CIs overlap** across independent samples; 6 registrar artifacts caught & retracted, none shipped. Gap: most registrars keyword-class. |
+| 4 | Local evolution works | ✅ PROVEN | End-to-end scan→canary→decide loop with a **real gate that weighs quality AND cost** (promotes, reverts on weak quality, reverts on cost regression); Layer A on real data hits **precision/recall 1.0**. Gap: run on demo logs, not a production routing log yet. |
 | 5 | Global culture works | ⚙️ MECHANISM-ONLY | Emitter is **structurally leak-proof**; defense **blocks planted attackers through sybil=16** on real data. Hard limit: **zero external adopters exist** — unprovable by any spend until people install it. |
 
-Total real API spend for this proof round: **~$13.7** (of $15 authorized). The Haiku
-full-suite run hit its budget cap at 29/61 skills — cross-model results below cover those
-29; the other 32 are Gemini-only pending a separate ~$5 authorization.
+Total real API spend for this proof round: **~$14.3** (~$13.7 EXP-023 + ~$0.6 EXP-024). The
+Haiku full-suite run hit its budget cap at 29/61 skills in EXP-023 and a completion pass for
+the remaining 32 is running separately; cross-model results below cover those 29 until it lands.
 
 ---
 
@@ -37,12 +37,22 @@ objective registrar the model never sees; paired McNemar effect + 95% CI. Then
 **Benjamini-Hochberg FDR correction** at q=0.05 (61 simultaneous tests ⇒ ~3 expected false
 positives uncorrected — so the raw count is *not* the honest count).
 
-**Result (Gemini, all 61 skills, FDR-corrected):** **24 wins, 0 losses.** Top effects:
+**Result (Gemini, all 61 skills, FDR-corrected):** **31 wins, 0 losses.** Top effects:
 tool-design +0.83, secrets-management +0.62, long-horizon-brief +0.60 (a brand-new skill's
 debut), skill-distillation +0.53, tool-adversarial-reading +0.51, reliability-engineering
-+0.50. The 3 skills that dropped from 27 raw → 24 FDR-corrected (injection-audit,
-model-card, supply-chain-vetting) sat right at the p≈0.05 boundary — exactly what FDR is
-for.
++0.50.
+
+**EXP-024 moved this from 24 → 31.** Two levers, both aimed at the two structural gaps
+claim 1 itself named (ceiling-locked tasks too easy to discriminate; near-misses under-
+powered): (1) wrote one harder, more discriminating task for each of the 14 skills that
+were ceiling-locked (both arms scoring 100%, e.g. "a PR adds one line to the system prompt
+— what does *this* diff need that a normal code review wouldn't ask" for
+`agent-code-review`) — 10 of 14 broke ceiling, 4 became new FDR-significant wins
+(`multimodal`, `testing-ergonomics`, `evolution-scan`, `model-migration`); (2) doubled runs
+(30→60) on the 7 closest near-misses from the prior round — 3 crossed the FDR bar
+(`injection-audit`, `cost-optimization`, `latency-optimization`). 4 skills remain
+ceiling-locked (`agent-observability`, `feedback-harvesting`, `retrieval-design`,
+`state-management` — genuinely resistant to the harder task, not yet cracked).
 
 **Result (cross-model, the 29 skills measured on both):** **6 confirmed useful on BOTH
 models, 0 confirmed harmful on either.** Both-model wins: tool-design, secrets-management,
@@ -50,19 +60,22 @@ long-horizon-brief, tool-adversarial-reading, eval-harness, grounding-citation. 
 win on one model and are neutral (not negative) on the other.
 
 **The load-bearing number: zero losses.** Across every skill measured, on either model,
-FDR-corrected, **not one skill is confirmed to make the model worse.** Four apparent HURTS
+FDR-corrected, **not one skill is confirmed to make the model worse.** Five apparent HURTS
 findings this session (context-engineering, accretion-refactor, eval-harness,
-requirements-interrogation) were each traced to a *registrar* bug and retracted after the
-fix — never a real skill defect (see claim 3).
+requirements-interrogation, retrieval-design) were each traced to a *registrar* bug and
+retracted after the fix — never a real skill defect (see claim 3).
 
 **Honest gaps:**
 - **Ecological validity** — tasks are single-turn micro-scenarios; the library's real claim
   is about multi-turn agent work. A skill can win micro-tasks and still not matter in a long
   session. Not yet tested; the right fix is dogfooding the routing log (claim 4's gap too).
-- **Depth** — the 49 newly-covered skills have 2 tasks each (first real signal, enough to
-  catch a strong win or a HURTS, not enough to resolve a small effect). 14 skills are
-  ceiling-locked (both arms 100% — tasks too easy to discriminate) and need harder tasks.
-- **Coverage** — Haiku's table is 29/61 (budget cap); completing it needs ~$5 more.
+- **Depth** — most newly-covered skills still have 2-3 tasks each (first real signal, enough
+  to catch a strong win or a HURTS, not enough to resolve a small effect). 4 skills
+  (`agent-observability`, `feedback-harvesting`, `retrieval-design`, `state-management`) are
+  still ceiling-locked even after a harder task — need a genuinely different scenario, not
+  just a harder one.
+- **Coverage** — Haiku's table is 29/61 (budget cap); a completion pass for the rest is
+  running separately.
 
 ---
 
@@ -97,8 +110,9 @@ ROUTING.md but not yet benchmarked.
 Three independent lines of evidence:
 
 1. **Pre-spend gate.** Every registrar carries a should-pass and should-fail fixture;
-   `python3 -m simulator.measure --selfcheck` verifies all **159/159** before any run, and
-   the measurement refuses to spend if any registrar disagrees with its own fixture.
+   `python3 -m simulator.measure --selfcheck` verifies all **174/174** before any run, and
+   the measurement refuses to spend if any registrar disagrees with its own fixture — it
+   caught 3 more real bugs in EXP-024's newly-written tasks before a cent was spent on them.
 
 2. **Stability replication** (the direct "would this reproduce?" test). Five skills spanning
    the effect range, re-measured as a second independent real sample: **all 5 CIs overlap
@@ -106,13 +120,14 @@ Three independent lines of evidence:
    grounding-citation 0.167↔0.139, context-engineering 0.004↔0.000). The numbers are not
    seed-luck.
 
-3. **The eval caught its own bugs — five times — and none shipped.** Across the session,
-   five registrar artifacts produced false HURTS verdicts (EXP-009 context-engineering,
-   EXP-013 accretion-refactor, EXP-016 eval-harness + silent-failure-audit, EXP-022
-   requirements-interrogation + culture-telemetry). Every one was caught by reading raw
-   completions, fixed, and **re-measured with non-overlapping before/after CIs** — the
+3. **The eval caught its own bugs — six times — and none shipped.** Across the session, six
+   registrar artifacts produced false HURTS verdicts (EXP-009 context-engineering, EXP-013
+   accretion-refactor, EXP-016 eval-harness + silent-failure-audit, EXP-022
+   requirements-interrogation + culture-telemetry, EXP-024 retrieval-design). Every one was
+   caught by reading raw completions, fixed, and **re-measured with non-overlapping
+   before/after CIs** (retrieval-design: -0.122 significant HURTS → 0.000 ceiling) — the
    defect corrected, not the number massaged. This is the eval-of-the-eval (`verifier-design`)
-   working in practice, repeatedly.
+   working in practice, repeatedly, on brand-new tasks just as reliably as on old ones.
 
 **Honest gap:** most registrars are keyword/structural ("medium" strength), and that class
 is exactly where all five artifacts lived. The categorical upgrade — artifact-checking
@@ -128,9 +143,12 @@ Two independent demonstrations:
 1. **The loop is operated, not just specified.** `harness/evolve_cycle.py` runs the full
    Engine end-to-end on a routing log: **scan** (detect a high-override skill) → **propose**
    (a concrete, reversible tier edit) → **canary** (measure on a held-out window) →
-   **decide** (gated). Both gate paths are verified: it **PROMOTES** when the canary cuts the
-   override rate past the bar, and **REVERTS** when it doesn't — a gate that only ever says
-   yes isn't a gate.
+   **decide** (gated on quality *and* cost). Three gate paths are verified: it **PROMOTES**
+   when the canary cuts the override rate past the bar at an acceptable cost; it **REVERTS**
+   when the override rate doesn't fall enough; and it now also **REVERTS when quality
+   improves but cost/invocation regresses past a 15% tolerance** (`--demo-cost-regression`) —
+   a quality win bought with an uncapped cost increase is not a win. Logs with no cost field
+   fall back to a quality-only gate rather than silently passing a check they never made.
 
 2. **The culture mechanism recognizes real quality.** Feeding the real measured 29-skill
    effect table into the Layer-A population simulator (`--real` bridge): **precision 1.0,
@@ -182,7 +200,7 @@ generation" is more than suggestive.
 
 | Claim | To upgrade the verdict |
 |-------|------------------------|
-| 1 | Finish the Haiku 61-skill table (~$5); deepen the 49 first-pass skills to 8-15 tasks (~$40); **dogfood the routing log on this repo's own development** (free, attacks the ecological-validity gap directly). |
+| 1 | Finish the Haiku 61-skill table (running); crack the last 4 ceiling-locked skills with a genuinely different scenario (not just a harder one); deepen first-pass skills to 8-15 tasks (~$40); **dogfood the routing log on this repo's own development** (free, attacks the ecological-validity gap directly). |
 | 2 | An independently-generated query set; add tier-correctness and compound-chain cases. |
 | 3 | Upgrade the keyword-class registrars to artifact-checking parsers. |
 | 4 | Run one real cycle against a production routing log (needs usage). |

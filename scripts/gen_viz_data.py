@@ -28,6 +28,9 @@ def bh_thr(ps, q=0.05):
 
 G = load("gemini_full61_20260723.json")
 G.update(load("gemini_hurts_recheck_20260723.json"))
+G.update(load("gemini_nearmiss7_20260725.json"))
+G.update(load("gemini_ceiling14_20260725.json"))
+G.update(load("gemini_retrieval_recheck_20260725.json"))
 H = merge("haiku_full61_20260723.json", "haiku_full61_part2_20260724.json")
 
 skills = sorted(G)
@@ -65,6 +68,7 @@ retract=[
  {"skill":"silent-failure-audit","model":"Haiku","before":-0.073,"after":0.0},
  {"skill":"requirements-interrogation","model":"Gemini","before":-0.633,"after":-0.033},
  {"skill":"culture-telemetry","model":"Gemini","before":-0.417,"after":0.0},
+ {"skill":"retrieval-design","model":"Gemini","before":-0.122,"after":0.0},
 ]
 
 # Chart 4: adversarial resilience (from sweep, hardcoded from EXP-015/017 real-ish + synthetic)
@@ -79,7 +83,7 @@ n_win=sum(1 for e in effects if e["verdict"]=="win")
 n_loss=sum(1 for e in effects if e["verdict"]=="loss")
 n_ceiling=sum(1 for e in effects if e["verdict"]=="ceiling")
 data={
- "generated": "2026-07-24",
+ "generated": "2026-07-25",
  "n_skills": len(skills), "n_win_fdr": n_win, "n_loss": n_loss, "n_ceiling": n_ceiling,
  "haiku_covered": len(both),
  "effects": effects, "cross": cross, "retract": retract, "adversarial": adversarial,

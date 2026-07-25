@@ -442,6 +442,12 @@ def load_tasks() -> List[Task]:
         _mentions_any("synthetic", "variation", "noise", "typo", "parameter", "axis", "tag",
                       "alternative", "scenario", "edge case", r"1\.[\s\S]*2\.[\s\S]*3\."),
         base=0.4, eff=0.22)
+    add("synth-task-1", "eval", "synthetic-task-generation", STG,
+        'Given real task seed "Cancel subscription for account #4471", generate 3 plausible '
+        "synthetic variations along different noise/parameter axes for an eval suite.",
+        _mentions_any("synthetic", "variation", "noise", "typo", "parameter", "axis", "tag",
+                      "alternative", "scenario", "edge case", r"1\.[\s\S]*2\.[\s\S]*3\."),
+        base=0.4, eff=0.22)
 
     AR = "SKILL accretion-refactor: consolidate bloated system prompts by pruning panic rules and resolving contradictory constraints."
     add("accretion-0", "evolve", "accretion-refactor", AR,
@@ -548,16 +554,25 @@ def load_tasks() -> List[Task]:
                       "coordinat"), base=0.35, eff=0.22)
 
     RI = "SKILL requirements-interrogation: force a structured requirements interview before designing or building an agent, one question at a time."
+    # EXP-022: a model following this skill DOES the interview - it asks an
+    # actual clarifying question ("What is the primary channel...?") instead
+    # of describing the process. The original keyword list only rewarded
+    # narration and penalized the demonstrated behavior (4th shape of the
+    # registrar anti-pattern: doing vs. describing). Accept an actual
+    # opening question as a pass.
+    _ASKS_QUESTION = r"^\s*(what|who|how|which|when|where|why)\b[\s\S]{0,300}\?"
     add("req-interro-0", "codegen", "requirements-interrogation", RI,
         "A stakeholder says \"build me an agent that handles support tickets.\" What's the "
         "first thing to do before any design work?",
         _mentions_any("question", "who", "success criteria", "constraint", "scope",
-                      "measure", "interview"), base=0.35, eff=0.22)
+                      "measure", "interview", "clarify", _ASKS_QUESTION),
+        base=0.35, eff=0.22)
     add("req-interro-1", "codegen", "requirements-interrogation", RI,
         "Requirements for a new agent are vague and assumed. Force a structured process "
         "instead of guessing.",
         _mentions_any("one question at a time", "constraint", "success criteria", "scope",
-                      "stakeholder", "interview"), base=0.35, eff=0.22)
+                      "stakeholder", "interview", "clarify", _ASKS_QUESTION),
+        base=0.35, eff=0.22)
 
     # ---- build/ ----
     MCP = "SKILL mcp-server: scaffold, review, or debug an MCP server - transport, tool surface, auth, packaging."
@@ -592,6 +607,12 @@ def load_tasks() -> List[Task]:
         "Image inputs are expensive and slow for an agent. Budget the multimodal cost.",
         _mentions_any("resize", "resolution", "downsample", "token", "cache", "budget"),
         base=0.35, eff=0.22)
+    add("multimodal-2", "codegen", "multimodal", MM,
+        "An agent needs to answer questions about a 40-page text-heavy PDF report. The "
+        "simplest implementation sends the raw PDF pages as images directly to a "
+        "vision-capable model for every question. What's the issue with this approach?",
+        _mentions_any("extract", r"text.?first", "cheaper", "citable", "reliable", "waste",
+                      "fidelity"), base=0.30, eff=0.28)
 
     RD = "SKILL retrieval-design: design the retrieval layer for a knowledge agent - chunking, indexing, ranking, context budget."
     add("retrieval-0", "codegen", "retrieval-design", RD,
@@ -602,6 +623,23 @@ def load_tasks() -> List[Task]:
         "Too much retrieved content reaches the context window, bloating cost. Fix it.",
         _mentions_any(r"top.?k", "limit", "rerank", "truncat", "filter", "budget"),
         base=0.35, eff=0.22)
+    add("retrieval-2", "codegen", "retrieval-design", RD,
+        "A RAG agent keeps giving wrong answers. The team's instinct is to swap in a "
+        "bigger, more expensive generation model. What check should happen first, before "
+        "touching the generation model?",
+        # EXP-024: a model that says "evaluate the retrieval LAYER" or
+        # "inspect the retrieved chunks... verify the ground truth is
+        # present" is doing the task correctly without hitting the original
+        # narrow "evaluate retrieval"/"precision"/"recall" vocabulary -
+        # broadened after this arm-specific gap flipped the aggregate
+        # negative on real data (same anti-pattern as EXP-009/013/016/018/022).
+        _mentions_any(r"retrieval.{0,20}(isolat|own|precision|recall|quality)",
+                      r"(evaluate|check|inspect|audit).{0,20}retriev",
+                      r"chunks?.{0,40}(retriev|present|correct|ground truth)",
+                      r"ground truth.{0,25}(present|retriev|actually)",
+                      r"labeled.{0,20}(query|chunk)", "in isolation", "on its own",
+                      r"before.{0,35}(swap|upgrad|bigger|expensive|touching|generation model)"),
+        base=0.30, eff=0.28)
 
     SA = "SKILL skill-authoring: write or review a SKILL.md so it triggers reliably, stays small, and produces checkable output."
     add("skill-author-0", "codegen", "skill-authoring", SA,
@@ -622,6 +660,13 @@ def load_tasks() -> List[Task]:
         "An agent needs to pause for human approval mid-run and resume later. Design it.",
         _mentions_any("pause", "resume", "checkpoint", r"human.?in.?the.?loop", "wait"),
         base=0.35, eff=0.22)
+    add("state-mgmt-2", "codegen", "state-management", SM,
+        "An agent's step sends a confirmation email, then the process crashes before that "
+        "step's checkpoint is saved. On restart, the run resumes from the last saved "
+        "checkpoint and reruns the email-sending step. What could go wrong, and what "
+        "design prevents it?",
+        _mentions_any("idempoten", r"create.?or.?get", "duplicat", "twice", "double",
+                      "dedup"), base=0.30, eff=0.28)
 
     # ---- dev/ ----
     ACR = "SKILL agent-code-review: review agent code changes for prompt/tool edits, context and cost impact, non-determinism, safety-surface changes."
@@ -634,6 +679,14 @@ def load_tasks() -> List[Task]:
         "A PR adds a new tool to an agent. What's the review checklist?",
         _mentions_any("schema", "permission", "blast radius", "eval", "test", "enum"),
         base=0.35, eff=0.22)
+    add("agent-cr-2", "codegen", "agent-code-review", ACR,
+        "A PR adds one line to the agent's system prompt: \"Always double-check your work "
+        "before responding.\" CI passes. What review question does this specific one-line "
+        "prompt change need that a normal code-review checklist for application code "
+        "wouldn't ask?",
+        _mentions_any("blast radius", "every task", "contradict", "duplicat",
+                      r"over.?trigger", "eval delta", r"before.{0,10}after"),
+        base=0.30, eff=0.28)
 
     ASC = "SKILL agent-scaffolding: stand up a new agent project with the right structure from the first commit."
     add("scaffold-0", "codegen", "agent-scaffolding", ASC,
@@ -682,6 +735,13 @@ def load_tasks() -> List[Task]:
     add("testing-erg-1", "codegen", "testing-ergonomics", TE,
         "A tool needs a fast unit test without calling the network.",
         _mentions_any("mock", "stub", "unit test", "fixture", _CODE_SIGNAL), base=0.35, eff=0.22)
+    add("testing-erg-2", "codegen", "testing-ergonomics", TE,
+        "A developer tests the agent's tool-calling control-flow logic by calling the "
+        "real model and checking whether the final answer is correct. Is this a good "
+        "unit test for the control-flow logic specifically?",
+        _mentions_any("mock", "canned", "stub", r"what.{0,40}did with",
+                      "not model quality", "independent of"),
+        base=0.30, eff=0.28)
 
     # ---- eval/ ----
     AR2 = "SKILL adversarial-review: spawn a reviewer biased to disprove, not approve, a non-trivial agent design decision before it stands."
@@ -705,6 +765,12 @@ def load_tasks() -> List[Task]:
         "A judge's scores don't match human judgment. Fix the calibration.",
         _mentions_any("calibrat", "human", "agreement", "kappa", "label", "rubric"),
         base=0.35, eff=0.22)
+    add("llm-judge-2", "eval", "llm-judge", LJ,
+        "A pairwise judge is built with response order randomized across the dataset to "
+        "avoid position bias. Is dataset-level randomization sufficient to control for "
+        "position bias on any single comparison?",
+        _mentions_any(r"swap", r"run.{0,10}twice", r"per.?item", "tie",
+                      "each comparison"), base=0.30, eff=0.28)
 
     MC = "SKILL model-card: document an agent's capabilities, limitations, intended use, and evaluated performance in a standard card."
     add("model-card-0", "eval", "model-card", MC,
@@ -748,13 +814,24 @@ def load_tasks() -> List[Task]:
     add("culture-tel-0", "evolve", "culture-telemetry", CT,
         "Design what gets published to the shared commons daily from routing logs, without "
         "leaking prompts or traces.",
-        _mentions_any("anonymiz", "aggregate", "allowlist", "signed", "no prompt", "no trace"),
+        # EXP-022: a model following the skill emits the ARTIFACT (a JSON
+        # aggregate report with hashed ids and counts-only metrics) without
+        # narrating the words "aggregate"/"anonymize" - accept the
+        # demonstrated artifact's own signals, not just the narration.
+        _mentions_any("anonymiz", "aggregate", "allowlist", "signed", "no prompt", "no trace",
+                      "hash", "signature", r"count\b", "metrics"),
         base=0.35, eff=0.22)
     add("culture-tel-1", "evolve", "culture-telemetry", CT,
         "A node wants to report which skills actually worked without exposing "
         "implementation details. Design the schema.",
         _mentions_any("aggregate", "anonymiz", "allowlist", "field", "schema", "signed"),
         base=0.35, eff=0.22)
+    add("culture-tel-2", "evolve", "culture-telemetry", CT,
+        "The daily emitter computes a stats cell for one pattern that has only 3 "
+        "underlying trials this window - below the k=5 anonymity floor. What should "
+        "happen to that cell?",
+        _mentions_any(r"roll", r"next (day|window)", "carry forward",
+                      r"accumulat.{0,15}(until|k)"), base=0.30, eff=0.28)
 
     EC = "SKILL evolution-canary: monitor a recently auto-applied skill change during its canary period, auto-revert on regression."
     add("evo-canary-0", "evolve", "evolution-canary", EC,
@@ -809,6 +886,12 @@ def load_tasks() -> List[Task]:
         "Classify a detected trigger by type and risk before dispatching a fix.",
         _mentions_any("classify", "risk", "trigger", "dispatch", "severity"),
         base=0.35, eff=0.22)
+    add("evo-scan-2", "evolve", "evolution-scan", ES,
+        "In the same scan window, an override-rate trigger and a failure-cluster trigger "
+        "both target the same skill. What must happen before either trigger gets resolved "
+        "individually?",
+        _mentions_any("conflict", "evolution-conflict", r"before.{0,20}resolv",
+                      "dispatch to conflict"), base=0.30, eff=0.28)
 
     FH = "SKILL feedback-harvesting: systematically collect explicit and implicit feedback signals into a ranked improvement queue."
     add("feedback-0", "evolve", "feedback-harvesting", FH,
@@ -820,6 +903,13 @@ def load_tasks() -> List[Task]:
         "abandonment.",
         _mentions_any("implicit", "edit", "override", "abandon", "signal"),
         base=0.35, eff=0.22)
+    add("feedback-2", "evolve", "feedback-harvesting", FH,
+        "Three feedback signals arrive about the same agent: a user substantially "
+        "rewrote its output before using it, a user cancelled a task mid-run, and a user "
+        "stopped the agent mid-action and took over manually. Which of these is the "
+        "strongest negative signal, and why?",
+        _mentions_any("interrupt", r"mid.?action", "saw where it was going"),
+        base=0.30, eff=0.28)
 
     RT = "SKILL routing-tuner: turn skill-routing misfires and misses into gated edits to the routing table."
     add("routing-tuner-0", "evolve", "routing-tuner", RT,
@@ -883,6 +973,13 @@ def load_tasks() -> List[Task]:
         "instrumentation.",
         _mentions_any("trace", "log", "record", "replay", "structured log"),
         base=0.35, eff=0.22)
+    add("observ-2", "ops", "agent-observability", AO,
+        "The dashboard shows stable average latency and average cost across the whole "
+        "fleet for the past month, yet a subset of users keep reporting bad runs. What's "
+        "the flaw in trusting the stable averages as a signal that nothing is wrong?",
+        _mentions_any("aggregate", "hide", "slice", "task type",
+                      "model version", "p95", "p50", "outlier", "tail"),
+        base=0.30, eff=0.28)
 
     CG = "SKILL cost-governance: control agent spend at the org/fleet level - budgets, per-tenant quotas, spend caps, attribution."
     add("cost-gov-0", "ops", "cost-governance", CG,
@@ -892,6 +989,12 @@ def load_tasks() -> List[Task]:
     add("cost-gov-1", "ops", "cost-governance", CG,
         "An unexpected cost spike just happened. Design the anomaly alert.",
         _mentions_any("alert", "anomaly", "threshold", "spike", "budget"), base=0.35, eff=0.22)
+    add("cost-gov-2", "ops", "cost-governance", CG,
+        "Finance sets a $10k/month budget per team and publishes it on a spend dashboard "
+        "that team leads can view anytime. Does this count as cost governance being in "
+        "place?",
+        _mentions_any("enforc", r"\bcap\b", "throttle", "downgrade", "queue", "block",
+                      r"limit.?action"), base=0.30, eff=0.28)
 
     CO2 = "SKILL cost-optimization: reduce an agent's cost and latency without dropping quality - caching, model routing, context diet, batching."
     add("cost-opt-0", "ops", "cost-optimization", CO2,
@@ -938,6 +1041,12 @@ def load_tasks() -> List[Task]:
     add("model-mig-1", "ops", "model-migration", MM2,
         "A provider is deprecating the model behind an agent. Plan the migration.",
         _mentions_any("eval", "baseline", "migrat", "rollout", "compare"), base=0.35, eff=0.22)
+    add("model-mig-2", "ops", "model-migration", MM2,
+        "A team migrates an agent to a new model generation by immediately re-tuning the "
+        "prompt to suit the new model's style, then running evals once. What "
+        "order-of-operations mistake does this make?",
+        _mentions_any("baselin", r"raw.{0,15}swap", "unchanged", "isolat",
+                      r"separat.{0,20}(model|prompt)"), base=0.30, eff=0.28)
 
     MR = "SKILL model-routing: route each request to the right model by difficulty, cost, latency, and a quality floor, with fallback."
     add("model-route-0", "ops", "model-routing", MR,
@@ -948,6 +1057,12 @@ def load_tasks() -> List[Task]:
         "A chosen model fails or refuses mid-request. Design the fallback.",
         _mentions_any("fallback", "failover", "retry", "route", "backup model"),
         base=0.35, eff=0.22)
+    add("model-route-2", "ops", "model-routing", MR,
+        "For a simple 3-step agent, an engineer proposes adding a small classifier model "
+        "that decides, on every single request, which downstream model to route to. "
+        "What's the concern with defaulting straight to this dynamic approach?",
+        _mentions_any("static", "adds a call", "extra call", "failure mode",
+                      "only if it pays", r"simple.{0,15}first"), base=0.30, eff=0.28)
 
     REL = "SKILL reliability-engineering: make an agent survive dependency failures - retries, fallbacks, circuit breakers, graceful degradation."
     add("reliability-0", "ops", "reliability-engineering", REL,
@@ -998,6 +1113,12 @@ def load_tasks() -> List[Task]:
         "Design the anonymization contract for anything that leaves this node.",
         _mentions_any("anonymiz", r"k.?anonymity", "aggregate", "redact", "boundary"),
         base=0.35, eff=0.22)
+    add("privacy-2", "safety", "privacy", PRIV,
+        "A system stores raw user messages in logs unmodified, and personal data is only "
+        "stripped out later when an analyst runs a report query against those logs. Is "
+        "this an acceptable redaction design?",
+        _mentions_any(r"write.?time", r"at write", "\bsource\b", "already sat",
+                      "ingestion", r"before.{0,15}stor"), base=0.30, eff=0.28)
 
     SP = "SKILL sandbox-policy: choose and configure the execution sandbox for agent-run code - isolation level, filesystem/network policy, limits."
     add("sandbox-0", "safety", "sandbox-policy", SP,
@@ -1180,6 +1301,12 @@ FIXTURES: Dict[str, Tuple[str, str]] = {
     "synth-task-0": ("Generate synthetic variations along the id-parameter axis: typo'd "
                      "name, numeric ID instead of name, added noise like extra whitespace.",
                      "Find user Alice by ID, find user Bob by ID, find user Carol by ID."),
+    "synth-task-1": ("1. Cancel subscription for account #4472 (typo'd digit). 2. Cancel "
+                     "subscription for account number 4471 (phrasing noise). 3. Cancel "
+                     "subscription for account #4471 effective next billing cycle (added "
+                     "parameter).",
+                     "Cancel subscription for account #4471, cancel subscription for "
+                     "account #4472, cancel subscription for account #4473."),
 
     # accretion-refactor: good = contradiction resolved to one rule; bad = unchanged original.
     "accretion-0": ("Always format output as a markdown table.",
@@ -1259,12 +1386,25 @@ FIXTURES: Dict[str, Tuple[str, str]] = {
     "multimodal-1": ("Downsample and resize images to cap resolution, and cache repeated "
                      "image tokens against the budget.",
                      "Just send the images at full size every time."),
+    "multimodal-2": ("Text-heavy documents should be extracted to text first, not sent as "
+                     "raw images on every call - extraction is cheaper, more reliable, and "
+                     "citable, while sending pages as images wastes tokens and loses "
+                     "fidelity for content that's fundamentally text.",
+                     "That's a good approach since the model can see the document exactly "
+                     "as a person would."),
     "retrieval-0": ("Rework the chunking and embedding index, then rerank by relevance to "
                     "the query.",
                     "Retrieve more documents to be safe."),
     "retrieval-1": ("Cap retrieval to top-k results with a limit, rerank, and truncate to "
                     "the context budget.",
                     "Just send everything retrieved to the model."),
+    "retrieval-2": ("Evaluate retrieval on its own first - build a small labeled "
+                    "query-to-correct-chunk set and measure precision and recall. That "
+                    "tells you whether the fault is retrieval returning the wrong evidence "
+                    "or generation reasoning badly over correct evidence, before spending "
+                    "on a bigger model.",
+                    "Just upgrade to the most capable generation model available and see "
+                    "if the answers improve."),
     "skill-author-0": ("Fix the description's trigger keywords and add a concrete 'when to "
                        "use' example.",
                        "The skill file just needs to be longer."),
@@ -1277,12 +1417,23 @@ FIXTURES: Dict[str, Tuple[str, str]] = {
     "state-mgmt-1": ("Checkpoint state, pause for human-in-the-loop approval, and resume "
                      "from the same checkpoint.",
                      "Just have it sleep for a bit and continue on its own."),
+    "state-mgmt-2": ("The email could get sent twice - the side effect happened but the "
+                     "checkpoint wasn't saved before the crash. The fix is making the step "
+                     "idempotent with an idempotency key or a create-or-get pattern, so "
+                     "rerunning it on resume is safe rather than repeating the side effect.",
+                     "That's fine, the resume logic will just pick up from where it left "
+                     "off correctly."),
     "agent-cr-0": ("Check the prompt diff for eval regressions, token/cost impact, and "
                    "increased non-determinism.",
                    "Looks fine, approve it."),
     "agent-cr-1": ("Check the tool's schema for enum constraints, its permission scope and "
                    "blast radius, and run the eval suite.",
                    "Looks fine, approve it."),
+    "agent-cr-2": ("Check whether this instruction contradicts an existing one elsewhere in "
+                   "the prompt, whether it's now duplicated in two places, and whether the "
+                   "aggressive phrasing risks over-triggering across every task - and "
+                   "demand a before/after eval delta, not just 'looks fine'.",
+                   "Looks like a harmless one-line change, LGTM, ship it."),
     "scaffold-0": ("Set up the eval stub, config, observability hooks, and project structure "
                    "before the dev loop starts.",
                    "Just start writing the prompt."),
@@ -1311,6 +1462,13 @@ FIXTURES: Dict[str, Tuple[str, str]] = {
                       "Just run the tests against the real API each time."),
     "testing-erg-1": ("```python\ndef test_tool():\n    return mock_api_call()\n```",
                       "Manually click through the UI to test it."),
+    "testing-erg-2": ("No - that tests model quality, not control flow. The model call "
+                      "should be mocked with canned responses so the test asserts on what "
+                      "the agent's loop did with a given tool_use output - did it loop "
+                      "correctly, stop right - independent of whether the model itself is "
+                      "good that day.",
+                      "Yes, if the final answer is correct then the control-flow logic "
+                      "must be working properly."),
     "adv-review-0": ("Spawn a fresh-context adversarial reviewer whose job is to disprove "
                      "the design and attack its assumptions, like a red team.",
                      "It looks solid to me, ship it."),
@@ -1323,6 +1481,12 @@ FIXTURES: Dict[str, Tuple[str, str]] = {
     "llm-judge-1": ("Calibrate the judge against human-labeled examples and measure "
                     "agreement with kappa.",
                     "The judge is probably fine, don't worry about it."),
+    "llm-judge-2": ("No - dataset-level randomization only averages the bias away, it "
+                    "doesn't catch it on a single item. Each comparison should be run "
+                    "twice with positions swapped; if the two passes disagree, treat that "
+                    "item as a tie at low confidence rather than trusting either verdict.",
+                    "Yes, randomizing the order across the dataset removes position bias, "
+                    "no further check is needed."),
     "model-card-0": ("Document the agent's capabilities, limitations, intended use, and "
                      "evaluated performance in a model card.",
                      "It works, that's all people need to know."),
@@ -1348,6 +1512,12 @@ FIXTURES: Dict[str, Tuple[str, str]] = {
     "culture-tel-1": ("Design an allowlisted, signed schema of aggregate fields for the "
                       "report.",
                       "Send the raw session data, we'll figure out privacy later."),
+    "culture-tel-2": ("Suppress that cell for now and roll it into the next day's "
+                      "aggregation window, carry forward and accumulate trials until it "
+                      "clears k=5 - preserving both the daily cadence and anonymity "
+                      "rather than losing the evidence permanently.",
+                      "Just drop it and don't report that cell this window; move on to "
+                      "the next pattern."),
     "evo-canary-0": ("Monitor the canary's override rate and eval score against a "
                      "threshold, auto-reverting if it regresses.",
                      "It's probably fine, check back next week."),
@@ -1377,12 +1547,23 @@ FIXTURES: Dict[str, Tuple[str, str]] = {
     "evo-scan-1": ("Classify the trigger by risk and severity before dispatching the "
                    "appropriate fix.",
                    "Just apply a generic fix to whatever seems wrong."),
+    "evo-scan-2": ("Route it to evolution-conflict first - when multiple triggers target "
+                   "the same skill, that must be checked and resolved before any "
+                   "individual trigger proceeds, so the two fixes don't fight each other.",
+                   "Just handle whichever trigger came in first, then do the second one "
+                   "afterward."),
     "feedback-0": ("Capture the correction as a structured signal in a log and add it to "
                    "the improvement queue.",
                    "It's probably not important, move on."),
     "feedback-1": ("Track implicit signals too - edits, overrides, and abandonment - not "
                    "just explicit corrections.",
                    "Only explicit feedback matters."),
+    "feedback-2": ("The interruption - stopping the agent mid-action - is the strongest "
+                   "negative signal, because the user saw exactly where it was heading and "
+                   "chose to stop it before it finished, which is a stronger statement "
+                   "than an edit or a cancellation.",
+                   "They're all roughly equally bad, just log all three the same way and "
+                   "count total complaints."),
     "routing-tuner-0": ("The override rate shows a routing misfire - edit the routing table "
                         "to fix the tier and gate.",
                         "Users will get used to it eventually."),
@@ -1418,12 +1599,24 @@ FIXTURES: Dict[str, Tuple[str, str]] = {
     "observ-1": ("Add structured trace logging so you can read what happened instead of "
                 "replaying it live.",
                 "Just re-run it whenever there's an issue."),
+    "observ-2": ("Averages across the whole fleet hide interesting behavior - a real "
+                "observability setup slices success rate, cost, and latency by task type "
+                "and model version, and watches p95/p99 tails, not just the mean, because "
+                "a small slice can be badly broken while the aggregate looks fine.",
+                "The averages look stable, so the system is healthy overall; the "
+                "complaints are probably just unlucky users."),
     "cost-gov-0": ("Set a per-tenant quota and spend cap with budget attribution and an "
                    "alert on overage.",
                    "We'll just keep an eye on the total bill."),
     "cost-gov-1": ("Set an anomaly alert that fires when spend crosses a spike threshold "
                    "against budget.",
                    "It was probably a one-time fluke."),
+    "cost-gov-2": ("No - a budget that's only visible on a dashboard isn't enforced. It "
+                   "needs a hard cap wired into the harness that actually throttles, "
+                   "downgrades the model, queues, or blocks calls once the limit is hit, "
+                   "with a defined action, not just visibility.",
+                   "Yes, as long as team leads can see their spend on the dashboard, "
+                   "that's sufficient governance."),
     "cost-opt-0": ("Cache repeated calls, route simple requests to a smaller model, batch "
                    "requests, and trim the context to cut tokens.",
                    "Just ask people to use it less."),
@@ -1454,12 +1647,24 @@ FIXTURES: Dict[str, Tuple[str, str]] = {
     "model-mig-1": ("Compare the new model against the eval baseline before completing the "
                     "migration rollout.",
                     "The new model is probably better anyway."),
+    "model-mig-2": ("They skipped re-baselining the raw model swap first. Without running "
+                    "the existing prompt on the new model unchanged before any edits, "
+                    "there's no way to tell whether a regression or improvement came from "
+                    "the model change or from the prompt re-tuning.",
+                    "That's fine - as long as the final eval numbers look good, the order "
+                    "doesn't matter."),
     "model-route-0": ("Route by difficulty - cheap model for easy queries, frontier model "
                       "for hard ones, with a quality floor and fallback.",
                       "Use the same model for everything, it's simpler."),
     "model-route-1": ("Add a fallback and failover to a backup model with retry when the "
                       "primary model fails or refuses.",
                       "Just show the user an error message."),
+    "model-route-2": ("Prefer static routing by step type first - it's simpler, cacheable, "
+                      "and debuggable. A per-request classifier adds an extra call and a "
+                      "new failure mode; only justified if the static split is actually "
+                      "leaving real money or latency on the table.",
+                      "Dynamic per-request routing is always more optimal, so it's the "
+                      "right default for any agent."),
     "reliability-0": ("Add retries, a circuit breaker, a fallback, and graceful degradation "
                       "with a timeout.",
                       "The dependency is usually reliable, don't worry about it."),
@@ -1489,6 +1694,12 @@ FIXTURES: Dict[str, Tuple[str, str]] = {
     "privacy-1": ("Anonymize with a k-anonymity floor and only send redacted aggregate "
                   "data across the boundary.",
                   "Just encrypt it, that should be enough."),
+    "privacy-2": ("No - redaction has to happen at write time, when the data is first "
+                  "stored, not at read time. If raw personal data already sat in the log "
+                  "store waiting for a query to filter it, it has already leaked to "
+                  "anyone with store access.",
+                  "Yes, as long as reports filter it out before anyone sees the output, "
+                  "that's sufficient."),
     "sandbox-0": ("Run it in a gVisor or seccomp-restricted sandboxed container with "
                   "isolation and resource limits.",
                   "Just run it directly, we trust the model."),

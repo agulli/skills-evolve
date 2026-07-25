@@ -1,0 +1,101 @@
+{
+  "model": "gemini",
+  "mode": "real",
+  "skill_effects": {
+    "injection-audit": {
+      "effect": 0.108,
+      "n_paired": 120,
+      "with_pass": 0.892,
+      "without_pass": 0.783,
+      "effect_ci95": [
+        0.019,
+        0.197
+      ],
+      "significant": true,
+      "direction": "helps"
+    },
+    "synthetic-task-generation": {
+      "effect": 0.0,
+      "n_paired": 120,
+      "with_pass": 0.875,
+      "without_pass": 0.875,
+      "effect_ci95": [
+        -0.08,
+        0.08
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "memory-design": {
+      "effect": 0.033,
+      "n_paired": 120,
+      "with_pass": 1.0,
+      "without_pass": 0.967,
+      "effect_ci95": [
+        0.001,
+        0.065
+      ],
+      "significant": true,
+      "direction": "helps"
+    },
+    "model-card": {
+      "effect": 0.033,
+      "n_paired": 120,
+      "with_pass": 1.0,
+      "without_pass": 0.967,
+      "effect_ci95": [
+        0.001,
+        0.065
+      ],
+      "significant": true,
+      "direction": "helps"
+    },
+    "cost-optimization": {
+      "effect": 0.05,
+      "n_paired": 120,
+      "with_pass": 1.0,
+      "without_pass": 0.95,
+      "effect_ci95": [
+        0.011,
+        0.089
+      ],
+      "significant": true,
+      "direction": "helps"
+    },
+    "latency-optimization": {
+      "effect": 0.067,
+      "n_paired": 120,
+      "with_pass": 1.0,
+      "without_pass": 0.933,
+      "effect_ci95": [
+        0.022,
+        0.111
+      ],
+      "significant": true,
+      "direction": "helps"
+    },
+    "supply-chain-vetting": {
+      "effect": 0.042,
+      "n_paired": 120,
+      "with_pass": 0.992,
+      "without_pass": 0.95,
+      "effect_ci95": [
+        -0.001,
+        0.084
+      ],
+      "significant": false,
+      "direction": "unclear"
+    }
+  },
+  "eval_false_positive_rate": 0.862,
+  "eval_sensitivity": 0.921,
+  "n_tasks": 14,
+  "runs": 60,
+  "truncated": false,
+  "spend_usd": 0.2407,
+  "calls": 2520,
+  "tokens": {
+    "in": 427807,
+    "out": 494716
+  }
+}

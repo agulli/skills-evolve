@@ -1,0 +1,185 @@
+{
+  "model": "gemini",
+  "mode": "real",
+  "skill_effects": {
+    "multimodal": {
+      "effect": 0.144,
+      "n_paired": 90,
+      "with_pass": 0.856,
+      "without_pass": 0.711,
+      "effect_ci95": [
+        0.066,
+        0.223
+      ],
+      "significant": true,
+      "direction": "helps"
+    },
+    "retrieval-design": {
+      "effect": -0.122,
+      "n_paired": 90,
+      "with_pass": 0.8,
+      "without_pass": 0.922,
+      "effect_ci95": [
+        -0.203,
+        -0.042
+      ],
+      "significant": true,
+      "direction": "HURTS"
+    },
+    "state-management": {
+      "effect": 0.0,
+      "n_paired": 90,
+      "with_pass": 1.0,
+      "without_pass": 1.0,
+      "effect_ci95": [
+        0.0,
+        0.0
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "agent-code-review": {
+      "effect": 0.0,
+      "n_paired": 90,
+      "with_pass": 0.667,
+      "without_pass": 0.667,
+      "effect_ci95": [
+        0.0,
+        0.0
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "testing-ergonomics": {
+      "effect": 0.144,
+      "n_paired": 90,
+      "with_pass": 0.856,
+      "without_pass": 0.711,
+      "effect_ci95": [
+        0.066,
+        0.223
+      ],
+      "significant": true,
+      "direction": "helps"
+    },
+    "llm-judge": {
+      "effect": -0.022,
+      "n_paired": 90,
+      "with_pass": 0.667,
+      "without_pass": 0.689,
+      "effect_ci95": [
+        -0.053,
+        0.008
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "culture-telemetry": {
+      "effect": 0.011,
+      "n_paired": 90,
+      "with_pass": 0.667,
+      "without_pass": 0.656,
+      "effect_ci95": [
+        -0.011,
+        0.033
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "evolution-scan": {
+      "effect": 0.056,
+      "n_paired": 90,
+      "with_pass": 0.711,
+      "without_pass": 0.656,
+      "effect_ci95": [
+        0.008,
+        0.103
+      ],
+      "significant": true,
+      "direction": "helps"
+    },
+    "feedback-harvesting": {
+      "effect": 0.0,
+      "n_paired": 90,
+      "with_pass": 1.0,
+      "without_pass": 1.0,
+      "effect_ci95": [
+        0.0,
+        0.0
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "agent-observability": {
+      "effect": 0.0,
+      "n_paired": 90,
+      "with_pass": 1.0,
+      "without_pass": 1.0,
+      "effect_ci95": [
+        0.0,
+        0.0
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "cost-governance": {
+      "effect": -0.056,
+      "n_paired": 90,
+      "with_pass": 0.889,
+      "without_pass": 0.944,
+      "effect_ci95": [
+        -0.133,
+        0.022
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "model-migration": {
+      "effect": 0.056,
+      "n_paired": 90,
+      "with_pass": 1.0,
+      "without_pass": 0.944,
+      "effect_ci95": [
+        0.008,
+        0.103
+      ],
+      "significant": true,
+      "direction": "helps"
+    },
+    "model-routing": {
+      "effect": 0.056,
+      "n_paired": 90,
+      "with_pass": 0.8,
+      "without_pass": 0.744,
+      "effect_ci95": [
+        -0.016,
+        0.127
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "privacy": {
+      "effect": 0.0,
+      "n_paired": 90,
+      "with_pass": 0.989,
+      "without_pass": 0.989,
+      "effect_ci95": [
+        -0.031,
+        0.031
+      ],
+      "significant": false,
+      "direction": "unclear"
+    }
+  },
+  "eval_false_positive_rate": 0.952,
+  "eval_sensitivity": 0.977,
+  "n_tasks": 42,
+  "runs": 30,
+  "truncated": false,
+  "spend_usd": 0.3406,
+  "calls": 3780,
+  "tokens": {
+    "in": 609729,
+    "out": 698978
+  }
+}

@@ -30,13 +30,21 @@ from typing import Dict, List, Any
 OVERRIDE_TRIGGER = 0.30      # scan fires above this override rate
 MIN_INVOCATIONS = 5          # need enough evidence to act
 PROMOTE_IF_OVERRIDE_DROP = 0.10  # canary must cut override rate by >=10pp to keep
+COST_REGRESSION_TOLERANCE = 0.15  # canary's avg cost/invocation may rise at most 15% and still promote
 
 
-def _demo_log() -> List[Dict[str, Any]]:
+def _demo_log(cost_regression: bool = False) -> List[Dict[str, Any]]:
     """A routing log where one skill (context-engineering, PROPOSE tier) is
     being overridden heavily early, then — after a hypothetical tightening —
     fires less and is accepted when it does. Split 50/50 into a scan window
-    (first half) and a canary window (second half)."""
+    (first half) and a canary window (second half). Tightening PROPOSE->ASK
+    adds a human-confirmation round trip, so canary cost/invocation rises a
+    bit even when it wins on quality — the real tradeoff this gate checks.
+
+    cost_regression=True produces a second scenario: the same override-rate
+    win, but the confirmation turn is expensive enough to blow the cost
+    tolerance — demonstrating the gate reverts on cost even when quality
+    alone would have promoted."""
     rows = []
     t0 = time.time() - 20000
     # scan window: context-engineering over-fires, high override
@@ -45,20 +53,22 @@ def _demo_log() -> List[Dict[str, Any]]:
     # canary window: after tightening PROPOSE->ASK, it fires less & lands better
     ce_canary = ["overridden"] * 2 + ["accepted"] * 6          # 25% override
     tr_canary = ["accepted"] * 6
-    seq = ([("context-engineering", "PROPOSE", r, "scan") for r in ce_scan] +
-           [("trajectory-review", "AUTO", r, "scan") for r in tr_scan] +
-           [("context-engineering", "ASK", r, "canary") for r in ce_canary] +
-           [("trajectory-review", "AUTO", r, "canary") for r in tr_canary])
-    for i, (skill, tier, resp, window) in enumerate(seq):
+    scan_cost = 0.020                                           # $/invocation before the change
+    canary_cost = 0.028 if cost_regression else 0.023           # +40% (over tolerance) vs +15% (within)
+    seq = ([("context-engineering", "PROPOSE", r, "scan", scan_cost) for r in ce_scan] +
+           [("trajectory-review", "AUTO", r, "scan", 0.010) for r in tr_scan] +
+           [("context-engineering", "ASK", r, "canary", canary_cost) for r in ce_canary] +
+           [("trajectory-review", "AUTO", r, "canary", 0.010) for r in tr_canary])
+    for i, (skill, tier, resp, window, cost) in enumerate(seq):
         rows.append({"timestamp": t0 + i * 100, "skill": skill, "tier": tier,
-                     "user_response": resp, "window": window})
+                     "user_response": resp, "window": window, "cost_usd": cost})
     return rows
 
 
-def _read_log(path: str) -> List[Dict[str, Any]]:
+def _read_log(path: str, cost_regression: bool = False) -> List[Dict[str, Any]]:
     if not path or not os.path.exists(path):
         print(f"[evolve] no log at {path!r}; using built-in demo log")
-        return _demo_log()
+        return _demo_log(cost_regression=cost_regression)
     rows = []
     with open(path) as f:
         for line in f:
@@ -79,8 +89,19 @@ def _override_rate(rows: List[Dict[str, Any]], skill: str) -> tuple:
     return ov / len(hits), len(hits)
 
 
-def run_cycle(log_path: str = "") -> Dict[str, Any]:
-    rows = _read_log(log_path)
+def _avg_cost(rows: List[Dict[str, Any]], skill: str):
+    """Average cost_usd per invocation for `skill`, or None if the log
+    carries no cost field — callers must treat None as 'cost unknown', not
+    as zero, so an evolution run against an uninstrumented log doesn't
+    silently pass a cost check it never actually made."""
+    costs = [r["cost_usd"] for r in rows if r.get("skill") == skill and "cost_usd" in r]
+    if not costs:
+        return None
+    return sum(costs) / len(costs)
+
+
+def run_cycle(log_path: str = "", cost_regression: bool = False) -> Dict[str, Any]:
+    rows = _read_log(log_path, cost_regression=cost_regression)
     # window split: explicit "window" field if present, else first/second half
     if all("window" in r for r in rows):
         scan_rows = [r for r in rows if r["window"] == "scan"]
@@ -111,23 +132,43 @@ def run_cycle(log_path: str = "") -> Dict[str, Any]:
 
     # 3. CANARY — measure the same skill on the held-out canary window (the
     #    slice that reflects behavior *after* the change would have applied).
+    #    Quality and cost are measured from the SAME window so one gate can't
+    #    be satisfied at the other's expense by comparing mismatched slices.
     canary_rate, canary_n = _override_rate(canary_rows, flagged["skill"])
     drop = round(flagged["override_rate"] - canary_rate, 3)
+    scan_cost = _avg_cost(scan_rows, flagged["skill"])
+    canary_cost = _avg_cost(canary_rows, flagged["skill"])
+    cost_delta_pct = None
+    if scan_cost is not None and canary_cost is not None and scan_cost > 0:
+        cost_delta_pct = round((canary_cost - scan_cost) / scan_cost, 3)
     steps.append({"step": "canary", "canary_override_rate": round(canary_rate, 3),
-                  "canary_n": canary_n, "override_drop": drop})
+                  "canary_n": canary_n, "override_drop": drop,
+                  "scan_cost_usd": scan_cost, "canary_cost_usd": canary_cost,
+                  "cost_delta_pct": cost_delta_pct})
 
-    # 4. DECIDE — gate: promote only if the canary cut overrides enough AND
-    #    didn't collapse usage; else revert. This is the loop's spine.
+    # 4. DECIDE — gate: promote only if the canary (a) cut overrides enough
+    #    and (b) didn't blow the cost tolerance doing it; else revert. A
+    #    quality win bought with an uncapped cost regression is not a win —
+    #    this is the loop's spine, and the reason it isn't a rubber stamp.
     if canary_n == 0:
         decision, reason = "revert", "canary had no evidence — cannot confirm"
-    elif drop >= PROMOTE_IF_OVERRIDE_DROP:
-        decision = "promote"
-        reason = (f"override rate fell {flagged['override_rate']} -> {round(canary_rate,3)} "
-                  f"(drop {drop} >= {PROMOTE_IF_OVERRIDE_DROP}); change kept")
-    else:
+    elif drop < PROMOTE_IF_OVERRIDE_DROP:
         decision = "revert"
         reason = (f"override rate did not fall enough (drop {drop} < "
                   f"{PROMOTE_IF_OVERRIDE_DROP}); change rolled back")
+    elif cost_delta_pct is not None and cost_delta_pct > COST_REGRESSION_TOLERANCE:
+        decision = "revert"
+        reason = (f"override rate fell {flagged['override_rate']} -> {round(canary_rate,3)} "
+                  f"(drop {drop} >= {PROMOTE_IF_OVERRIDE_DROP}) but cost/invocation rose "
+                  f"{cost_delta_pct:+.1%} (> {COST_REGRESSION_TOLERANCE:.0%} tolerance); "
+                  f"quality win not worth the cost, change rolled back")
+    else:
+        decision = "promote"
+        cost_note = (f", cost/invocation {cost_delta_pct:+.1%} (within "
+                     f"{COST_REGRESSION_TOLERANCE:.0%} tolerance)" if cost_delta_pct is not None
+                     else ", cost data unavailable — quality-only gate")
+        reason = (f"override rate fell {flagged['override_rate']} -> {round(canary_rate,3)} "
+                  f"(drop {drop} >= {PROMOTE_IF_OVERRIDE_DROP}){cost_note}; change kept")
     steps.append({"step": "decide", "decision": decision, "reason": reason})
 
     return {"decision": decision, "reason": reason, "skill": flagged["skill"],
@@ -138,9 +179,13 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--log", default="", help="JSONL routing log (default: built-in demo)")
     ap.add_argument("--out", default="", help="append the cycle record to this JSONL log")
+    ap.add_argument("--demo-cost-regression", action="store_true",
+                     help="use the built-in demo variant where the quality win costs too "
+                          "much (>15%% cost/invocation increase) — demonstrates the gate "
+                          "reverting on cost even when override-rate alone would promote")
     args = ap.parse_args()
 
-    result = run_cycle(args.log)
+    result = run_cycle(args.log, cost_regression=args.demo_cost_regression)
     print(json.dumps(result, indent=2))
     if args.out:
         with open(args.out, "a") as f:

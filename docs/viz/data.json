@@ -1,9 +1,9 @@
 {
- "generated": "2026-07-24",
+ "generated": "2026-07-25",
  "n_skills": 61,
- "n_win_fdr": 24,
+ "n_win_fdr": 31,
  "n_loss": 0,
- "n_ceiling": 14,
+ "n_ceiling": 4,
  "haiku_covered": 29,
  "effects": [
   {
@@ -32,7 +32,7 @@
    "effect": 0.0,
    "lo": 0.0,
    "hi": 0.0,
-   "verdict": "ceiling"
+   "verdict": "nsig"
   },
   {
    "skill": "agent-identity",
@@ -92,24 +92,24 @@
   },
   {
    "skill": "cost-governance",
-   "effect": 0.0,
-   "lo": 0.0,
-   "hi": 0.0,
-   "verdict": "ceiling"
+   "effect": -0.056,
+   "lo": -0.133,
+   "hi": 0.022,
+   "verdict": "nsig"
   },
   {
    "skill": "cost-optimization",
    "effect": 0.05,
-   "lo": -0.005,
-   "hi": 0.105,
-   "verdict": "nsig"
+   "lo": 0.011,
+   "hi": 0.089,
+   "verdict": "win"
   },
   {
    "skill": "culture-telemetry",
-   "effect": 0.0,
-   "lo": 0.0,
-   "hi": 0.0,
-   "verdict": "ceiling"
+   "effect": 0.011,
+   "lo": -0.011,
+   "hi": 0.033,
+   "verdict": "nsig"
   },
   {
    "skill": "deployment",
@@ -155,10 +155,10 @@
   },
   {
    "skill": "evolution-scan",
-   "effect": 0.0,
-   "lo": 0.0,
-   "hi": 0.0,
-   "verdict": "ceiling"
+   "effect": 0.056,
+   "lo": 0.008,
+   "hi": 0.103,
+   "verdict": "win"
   },
   {
    "skill": "feedback-harvesting",
@@ -197,24 +197,24 @@
   },
   {
    "skill": "injection-audit",
-   "effect": 0.15,
-   "lo": 0.013,
-   "hi": 0.287,
-   "verdict": "nsig"
+   "effect": 0.108,
+   "lo": 0.019,
+   "hi": 0.197,
+   "verdict": "win"
   },
   {
    "skill": "latency-optimization",
-   "effect": 0.05,
-   "lo": -0.005,
-   "hi": 0.105,
-   "verdict": "nsig"
+   "effect": 0.067,
+   "lo": 0.022,
+   "hi": 0.111,
+   "verdict": "win"
   },
   {
    "skill": "llm-judge",
-   "effect": 0.0,
-   "lo": 0.0,
-   "hi": 0.0,
-   "verdict": "ceiling"
+   "effect": -0.022,
+   "lo": -0.053,
+   "hi": 0.008,
+   "verdict": "nsig"
   },
   {
    "skill": "local-replay",
@@ -239,38 +239,38 @@
   },
   {
    "skill": "memory-design",
-   "effect": 0.05,
-   "lo": -0.005,
-   "hi": 0.105,
+   "effect": 0.033,
+   "lo": 0.001,
+   "hi": 0.065,
    "verdict": "nsig"
   },
   {
    "skill": "model-card",
-   "effect": 0.067,
-   "lo": 0.004,
-   "hi": 0.13,
+   "effect": 0.033,
+   "lo": 0.001,
+   "hi": 0.065,
    "verdict": "nsig"
   },
   {
    "skill": "model-migration",
-   "effect": 0.0,
-   "lo": 0.0,
-   "hi": 0.0,
-   "verdict": "ceiling"
+   "effect": 0.056,
+   "lo": 0.008,
+   "hi": 0.103,
+   "verdict": "win"
   },
   {
    "skill": "model-routing",
-   "effect": 0.0,
-   "lo": 0.0,
-   "hi": 0.0,
-   "verdict": "ceiling"
+   "effect": 0.056,
+   "lo": -0.016,
+   "hi": 0.127,
+   "verdict": "nsig"
   },
   {
    "skill": "multimodal",
-   "effect": 0.0,
-   "lo": 0.0,
-   "hi": 0.0,
-   "verdict": "ceiling"
+   "effect": 0.144,
+   "lo": 0.066,
+   "hi": 0.223,
+   "verdict": "win"
   },
   {
    "skill": "output-safety",
@@ -282,9 +282,9 @@
   {
    "skill": "privacy",
    "effect": 0.0,
-   "lo": 0.0,
-   "hi": 0.0,
-   "verdict": "ceiling"
+   "lo": -0.031,
+   "hi": 0.031,
+   "verdict": "nsig"
   },
   {
    "skill": "prompt-architecture",
@@ -386,24 +386,24 @@
   },
   {
    "skill": "supply-chain-vetting",
-   "effect": 0.067,
-   "lo": 0.004,
-   "hi": 0.13,
+   "effect": 0.042,
+   "lo": -0.001,
+   "hi": 0.084,
    "verdict": "nsig"
   },
   {
    "skill": "synthetic-task-generation",
-   "effect": 0.1,
-   "lo": -0.007,
-   "hi": 0.207,
+   "effect": 0.0,
+   "lo": -0.08,
+   "hi": 0.08,
    "verdict": "nsig"
   },
   {
    "skill": "testing-ergonomics",
-   "effect": 0.0,
-   "lo": 0.0,
-   "hi": 0.0,
-   "verdict": "ceiling"
+   "effect": 0.144,
+   "lo": 0.066,
+   "hi": 0.223,
+   "verdict": "win"
   },
   {
    "skill": "tool-adversarial-reading",
@@ -504,8 +504,8 @@
   {
    "skill": "injection-audit",
    "haiku": -0.083,
-   "gemini": 0.15,
-   "cat": "neither"
+   "gemini": 0.108,
+   "cat": "one"
   },
   {
    "skill": "local-replay",
@@ -528,14 +528,14 @@
   {
    "skill": "memory-design",
    "haiku": 0.05,
-   "gemini": 0.05,
+   "gemini": 0.033,
    "cat": "neither"
   },
   {
    "skill": "multimodal",
    "haiku": 0.0,
-   "gemini": 0.0,
-   "cat": "neither"
+   "gemini": 0.144,
+   "cat": "one"
   },
   {
    "skill": "prompt-architecture",
@@ -588,14 +588,14 @@
   {
    "skill": "synthetic-task-generation",
    "haiku": 0.033,
-   "gemini": 0.1,
+   "gemini": 0.0,
    "cat": "neither"
   },
   {
    "skill": "testing-ergonomics",
    "haiku": 0.0,
-   "gemini": 0.0,
-   "cat": "neither"
+   "gemini": 0.144,
+   "cat": "one"
   },
   {
    "skill": "tool-adversarial-reading",
@@ -651,6 +651,12 @@
    "skill": "culture-telemetry",
    "model": "Gemini",
    "before": -0.417,
+   "after": 0.0
+  },
+  {
+   "skill": "retrieval-design",
+   "model": "Gemini",
+   "before": -0.122,
    "after": 0.0
   }
  ],
