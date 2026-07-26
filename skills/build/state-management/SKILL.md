@@ -9,7 +9,7 @@ A long-running agent is a distributed workflow: it will crash, get restarted, hi
 
 ## When to use
 - An agent runs long enough to be interrupted (minutes to hours), or spans sessions.
-- The run pauses for human approval/input and must resume later (`hitl` moments).
+- The run pauses for human approval/input and must resume later (human-in-the-loop moments).
 - Steps have side effects that must not double-execute on retry.
 
 ## When NOT to use
@@ -24,7 +24,7 @@ A long-running agent is a distributed workflow: it will crash, get restarted, hi
 
 3. **Persist state outside the process.** Execution state goes to durable storage (db, workflow engine, or the harness's own state store), not in-memory. Persist enough to reconstruct the run: current step, inputs, completed results, and the context needed to continue. Redact secrets/PII in persisted state (`privacy`, `secrets-management`).
 
-4. **Design pause/resume as a first-class state.** For human-in-the-loop waits, "waiting for approval" is a durable state the run can sit in for hours or days, then resume from — not a blocked thread. Capture what's being asked and what to do with each answer (`hitl-escalation` if present; otherwise define it here).
+4. **Design pause/resume as a first-class state.** For human-in-the-loop waits, "waiting for approval" is a durable state the run can sit in for hours or days, then resume from — not a blocked thread. Capture what's being asked and what to do with each answer (`human-review-escalation` if present; otherwise define it here).
 
 5. **Handle the retry/restart contract.** Define what happens on resume: verify the last checkpoint is consistent, skip completed idempotent steps, and cap retries so a poison step doesn't loop forever (`reliability-engineering`). A resume that blindly re-runs from the checkpoint without verifying state is a corruption source.
 

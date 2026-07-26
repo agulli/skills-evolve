@@ -22,7 +22,7 @@ Guardrails govern what an agent *does*; output safety governs what it *says*. A 
 
 2. **Screen outputs, not just inputs.** Input filtering doesn't catch an agent that generates something bad from a benign prompt. Put a check *between generation and the user*: policy classification, banned-content patterns, or a safety judge (`llm-judge`) for nuanced categories. The screen runs on every user-facing output, in the harness, not the prompt.
 
-3. **Decide the failure action per category.** For each violation type: block and regenerate, block and return a safe fallback, redact the offending part, or escalate to a human (`hitl-escalation`). A screen with no defined action just logs harm as it ships. High-harm categories block; borderline ones may soften or flag.
+3. **Decide the failure action per category.** For each violation type: block and regenerate, block and return a safe fallback, redact the offending part, or escalate to a human (`human-review-escalation`). A screen with no defined action just logs harm as it ships. High-harm categories block; borderline ones may soften or flag.
 
 4. **Handle refusals as a designed behavior.** When the agent should decline (out-of-scope, unsafe request), the refusal itself should be helpful and on-tone, not a curt block — and consistent, so users can't reword their way past it. Test that legitimate requests aren't over-refused (the other failure mode).
 

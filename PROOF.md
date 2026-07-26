@@ -133,7 +133,7 @@ Three independent lines of evidence:
    grounding-citation 0.167↔0.139, context-engineering 0.004↔0.000). The numbers are not
    seed-luck.
 
-3. **The eval caught its own bugs — six confirmed HURTS artifacts, and 11 pre-spend fixture
+3. **The eval caught its own bugs — six confirmed HURTS artifacts, and 6 pre-spend fixture
    bugs, none shipped.** Across the session, six registrar artifacts produced false HURTS
    verdicts (EXP-009 context-engineering, EXP-013 accretion-refactor, EXP-016 eval-harness +
    silent-failure-audit, EXP-022 requirements-interrogation + culture-telemetry, EXP-024

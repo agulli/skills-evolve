@@ -194,8 +194,23 @@ def _paired_ci95(pairs):
     return d, (d - 1.96 * se, d + 1.96 * se)
 
 
+def _effect_row(pairs: list) -> Dict:
+    n = len(pairs)
+    w = sum(1 for gw, _ in pairs if gw)
+    wo = sum(1 for _, gwo in pairs if gwo)
+    eff, (lo, hi) = _paired_ci95(pairs)
+    return {
+        "effect": round(eff, 3), "n_paired": n,
+        "with_pass": round(w / n, 3), "without_pass": round(wo / n, 3),
+        "effect_ci95": [round(lo, 3), round(hi, 3)],
+        "significant": (lo > 0 or hi < 0),   # CI excludes 0 (either direction)
+        "direction": "helps" if lo > 0 else ("HURTS" if hi < 0 else "unclear"),
+    }
+
+
 def measure(adapter: ModelAdapter, tasks: List[Task], runs: int = 5,
-            mock: bool = True, budget_usd: float = None) -> Dict:
+            mock: bool = True, budget_usd: float = None,
+            out_path: str = "", resume: Dict = None) -> Dict:
     """For each task run WITH and WITHOUT the skill `runs` times (paired: same
     task, both arms), grade by the objective registrar, and estimate the paired
     win-rate difference per skill with a McNemar 95% CI (H1). A real self-assess
@@ -203,63 +218,87 @@ def measure(adapter: ModelAdapter, tasks: List[Task], runs: int = 5,
 
     If `budget_usd` is set, the run hard-stops before the next task once spend
     reaches it, and reports `truncated: true` - so an unattended run cannot
-    overrun. Partial results are still returned."""
+    overrun. Partial results are still returned.
+
+    Crash resilience (added after repeated network-outage aborts lost whole
+    runs): if `out_path` is set, the partial result is flushed to disk after
+    every task, so an outage-triggered circuit-breaker abort keeps every skill
+    that finished. `resume` pre-seeds skill_effects from a prior partial file;
+    tasks whose skill is already complete there are skipped, so a re-run picks
+    up where the last one died instead of re-paying for finished skills."""
+    resume = resume or {}
+    tasks_per_skill: Dict[str, int] = {}
+    for t in tasks:
+        tasks_per_skill[t.skill] = tasks_per_skill.get(t.skill, 0) + 1
+    # A resumed skill counts as done only if it carries the full pair count we'd
+    # produce now (runs * its task count) - a partial skill is re-run cleanly.
+    done_skills = {s for s, row in resume.items()
+                   if row.get("n_paired", 0) >= runs * tasks_per_skill.get(s, 10 ** 9)}
     per_skill_pairs: Dict[str, list] = {}
+    skill_effects: Dict[str, Dict] = {s: resume[s] for s in done_skills}
     fp = tp = fn = tn = 0
     truncated = False
-    for t in tasks:
-        if budget_usd is not None and _SPEND["usd"] >= budget_usd:
-            truncated = True
-            break
-        for k in range(runs):
-            if mock:
-                rng = random.Random(f"{adapter.name}-{t.tid}-{k}")
-                r = rng.random()
-                b_only = max(0.0, (_MOCK_CHURN + t.mock_effect) / 2)   # skill-only win
-                c_only = max(0.0, (_MOCK_CHURN - t.mock_effect) / 2)   # baseline-only win
-                if r < b_only:
-                    gw, gwo = True, False
-                elif r < b_only + c_only:
-                    gw, gwo = False, True
-                else:                                                  # concordant pair
-                    both = rng.random() < t.base_rate
-                    gw = gwo = both
-                # Mock model self-assessment bias (realistic H2 shape: high recall, moderate false-positive rate)
-                self_eval = (rng.random() < 0.95) if gw else (rng.random() < 0.30)
-            else:
-                out_with = adapter.generate(t.system_base + "\n" + t.skill_text, t.user)
-                out_without = adapter.generate(t.system_base, t.user)
-                gw, gwo = t.registrar(out_with), t.registrar(out_without)
-                self_eval = _self_assess(adapter, t.user, out_with)   # real H2 signal
-            per_skill_pairs.setdefault(t.skill, []).append((gw, gwo))
-            truth = gw
-            if self_eval and truth: tp += 1
-            elif self_eval and not truth: fp += 1
-            elif not self_eval and truth: fn += 1
-            else: tn += 1
 
-    skill_effects = {}
-    for s, pairs in per_skill_pairs.items():
-        n = len(pairs)
-        w = sum(1 for gw, _ in pairs if gw)
-        wo = sum(1 for _, gwo in pairs if gwo)
-        eff, (lo, hi) = _paired_ci95(pairs)
-        skill_effects[s] = {
-            "effect": round(eff, 3), "n_paired": n,
-            "with_pass": round(w / n, 3), "without_pass": round(wo / n, 3),
-            "effect_ci95": [round(lo, 3), round(hi, 3)],
-            "significant": (lo > 0 or hi < 0),   # CI excludes 0 (either direction)
-            "direction": "helps" if lo > 0 else ("HURTS" if hi < 0 else "unclear"),
+    def _result() -> Dict:
+        return {
+            "model": adapter.name, "mode": "mock" if mock else "real",
+            "skill_effects": skill_effects,                              # H1 -> World.build
+            "eval_false_positive_rate": round(fp / ((fp + tn) or 1), 3), # H2 -> 1 - specificity
+            "eval_sensitivity": round(tp / ((tp + fn) or 1), 3),
+            "n_tasks": len(tasks), "runs": runs, "truncated": truncated,
+            "spend_usd": round(_SPEND["usd"], 4), "calls": _SPEND["calls"],
+            "tokens": {"in": _SPEND["in_tok"], "out": _SPEND["out_tok"]},
         }
-    return {
-        "model": adapter.name, "mode": "mock" if mock else "real",
-        "skill_effects": skill_effects,                              # H1 -> World.build
-        "eval_false_positive_rate": round(fp / ((fp + tn) or 1), 3), # H2 -> 1 - specificity
-        "eval_sensitivity": round(tp / ((tp + fn) or 1), 3),
-        "n_tasks": len(tasks), "runs": runs, "truncated": truncated,
-        "spend_usd": round(_SPEND["usd"], 4), "calls": _SPEND["calls"],
-        "tokens": {"in": _SPEND["in_tok"], "out": _SPEND["out_tok"]},
-    }
+
+    def _flush():
+        if out_path:
+            import json as _json
+            with open(out_path, "w") as f:
+                _json.dump(_result(), f, indent=2)
+
+    try:
+        for t in tasks:
+            if t.skill in done_skills:
+                continue
+            if budget_usd is not None and _SPEND["usd"] >= budget_usd:
+                truncated = True
+                break
+            for k in range(runs):
+                if mock:
+                    rng = random.Random(f"{adapter.name}-{t.tid}-{k}")
+                    r = rng.random()
+                    b_only = max(0.0, (_MOCK_CHURN + t.mock_effect) / 2)   # skill-only win
+                    c_only = max(0.0, (_MOCK_CHURN - t.mock_effect) / 2)   # baseline-only win
+                    if r < b_only:
+                        gw, gwo = True, False
+                    elif r < b_only + c_only:
+                        gw, gwo = False, True
+                    else:                                                  # concordant pair
+                        both = rng.random() < t.base_rate
+                        gw = gwo = both
+                    # Mock model self-assessment bias (realistic H2 shape: high recall, moderate false-positive rate)
+                    self_eval = (rng.random() < 0.95) if gw else (rng.random() < 0.30)
+                else:
+                    out_with = adapter.generate(t.system_base + "\n" + t.skill_text, t.user)
+                    out_without = adapter.generate(t.system_base, t.user)
+                    gw, gwo = t.registrar(out_with), t.registrar(out_without)
+                    self_eval = _self_assess(adapter, t.user, out_with)   # real H2 signal
+                per_skill_pairs.setdefault(t.skill, []).append((gw, gwo))
+                truth = gw
+                if self_eval and truth: tp += 1
+                elif self_eval and not truth: fp += 1
+                elif not self_eval and truth: fn += 1
+                else: tn += 1
+            # Recompute this skill's row from all pairs seen so far and checkpoint.
+            skill_effects[t.skill] = _effect_row(per_skill_pairs[t.skill])
+            _flush()
+    except BaseException:
+        # Circuit-breaker abort, Ctrl-C, or any error: persist what completed so
+        # a --resume run doesn't re-pay for it, then re-raise.
+        _flush()
+        raise
+
+    return _result()
 
 
 if __name__ == "__main__":
@@ -270,8 +309,11 @@ if __name__ == "__main__":
     ap.add_argument("--runs", type=int, default=5)
     ap.add_argument("--limit", type=int, default=0, help="cap #tasks (cheap smoke test)")
     ap.add_argument("--budget", type=float, default=None, help="hard USD spend cap")
-    ap.add_argument("--out", default="", help="write result JSON to this path")
+    ap.add_argument("--out", default="", help="write result JSON to this path (checkpointed per-skill)")
     ap.add_argument("--skills", default="", help="comma-separated skill names to filter to")
+    ap.add_argument("--resume", action="store_true",
+                     help="if --out exists, load it and skip already-complete skills "
+                          "(pick up where a prior outage-aborted run left off)")
     ap.add_argument("--selfcheck", action="store_true",
                      help="check registrars against their own fixtures and exit (no API calls, no spend)")
     ap.add_argument("--force", action="store_true",
@@ -308,10 +350,18 @@ if __name__ == "__main__":
               "retry, or pass --force to override.")
         raise SystemExit(1)
 
+    resume_effects = None
+    if args.resume and args.out and os.path.exists(args.out):
+        resume_effects = json.load(open(args.out)).get("skill_effects", {})
+        print(f"# --resume: loaded {len(resume_effects)} completed skill(s) from {args.out}")
+
     result = measure(get_adapter(args.model), tasks, runs=args.runs,
-                     mock=(args.model == "mock"), budget_usd=args.budget)
+                     mock=(args.model == "mock"), budget_usd=args.budget,
+                     out_path=args.out, resume=resume_effects)
     print(json.dumps(result, indent=2))
     if args.out:
+        # measure() already checkpointed to out_path after every skill; this is
+        # just the final authoritative flush.
         with open(args.out, "w") as f:
             json.dump(result, f, indent=2)
         print(f"\n# wrote {args.out}")
