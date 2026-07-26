@@ -1,0 +1,173 @@
+{
+  "model": "haiku",
+  "mode": "real",
+  "skill_effects": {
+    "llm-judge": {
+      "effect": 0.0,
+      "n_paired": 90,
+      "with_pass": 0.822,
+      "without_pass": 0.822,
+      "effect_ci95": [
+        -0.075,
+        0.075
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "evolution-propagate": {
+      "effect": 0.0,
+      "n_paired": 60,
+      "with_pass": 1.0,
+      "without_pass": 1.0,
+      "effect_ci95": [
+        0.0,
+        0.0
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "feedback-harvesting": {
+      "effect": 0.0,
+      "n_paired": 90,
+      "with_pass": 1.0,
+      "without_pass": 1.0,
+      "effect_ci95": [
+        0.0,
+        0.0
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "routing-tuner": {
+      "effect": 0.0,
+      "n_paired": 60,
+      "with_pass": 1.0,
+      "without_pass": 1.0,
+      "effect_ci95": [
+        0.0,
+        0.0
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "model-card": {
+      "effect": -0.011,
+      "n_paired": 90,
+      "with_pass": 0.989,
+      "without_pass": 1.0,
+      "effect_ci95": [
+        -0.033,
+        0.011
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "evolution-canary": {
+      "effect": 0.0,
+      "n_paired": 60,
+      "with_pass": 1.0,
+      "without_pass": 1.0,
+      "effect_ci95": [
+        0.0,
+        0.0
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "verifier-design": {
+      "effect": 0.433,
+      "n_paired": 90,
+      "with_pass": 0.933,
+      "without_pass": 0.5,
+      "effect_ci95": [
+        0.322,
+        0.545
+      ],
+      "significant": true,
+      "direction": "helps"
+    },
+    "culture-telemetry": {
+      "effect": 0.222,
+      "n_paired": 90,
+      "with_pass": 0.7,
+      "without_pass": 0.478,
+      "effect_ci95": [
+        0.136,
+        0.308
+      ],
+      "significant": true,
+      "direction": "helps"
+    },
+    "evolution-meta": {
+      "effect": 0.0,
+      "n_paired": 60,
+      "with_pass": 1.0,
+      "without_pass": 1.0,
+      "effect_ci95": [
+        0.0,
+        0.0
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "adversarial-review": {
+      "effect": 0.0,
+      "n_paired": 90,
+      "with_pass": 0.989,
+      "without_pass": 0.989,
+      "effect_ci95": [
+        -0.031,
+        0.031
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "evolution-scan": {
+      "effect": 0.256,
+      "n_paired": 90,
+      "with_pass": 0.956,
+      "without_pass": 0.7,
+      "effect_ci95": [
+        0.155,
+        0.356
+      ],
+      "significant": true,
+      "direction": "helps"
+    },
+    "trajectory-review": {
+      "effect": 0.0,
+      "n_paired": 60,
+      "with_pass": 1.0,
+      "without_pass": 1.0,
+      "effect_ci95": [
+        0.0,
+        0.0
+      ],
+      "significant": false,
+      "direction": "unclear"
+    },
+    "evolution-conflict": {
+      "effect": -0.067,
+      "n_paired": 90,
+      "with_pass": 0.933,
+      "without_pass": 1.0,
+      "effect_ci95": [
+        -0.118,
+        -0.015
+      ],
+      "significant": true,
+      "direction": "HURTS"
+    }
+  },
+  "eval_false_positive_rate": 0.0,
+  "eval_sensitivity": 0.0,
+  "n_tasks": 84,
+  "runs": 30,
+  "truncated": false,
+  "spend_usd": 0.0,
+  "calls": 0,
+  "tokens": {
+    "in": 0,
+    "out": 0
+  }
+}
