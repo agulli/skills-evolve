@@ -524,6 +524,12 @@ def load_tasks() -> List[Task]:
         "What architecture change fixes this?",
         _mentions_any("split", r"sub-?agent", "handoff", "specializ", "route", "workflow",
                       "decompos"), base=0.35, eff=0.25)
+    add("agent-arch-2", "codegen", "agent-architecture", AA,
+        "A team estimates a new multi-agent research pipeline will cost about 2-3x a "
+        "single agent's token spend, scaling roughly with the number of sub-agents they "
+        "plan to add. Is this a reasonable estimate?",
+        _mentions_any(r"10.{0,8}15x", "order of magnitude", "coordination overhead",
+                      "underestimat", "retries", "consensus"), base=0.30, eff=0.28)
 
     LHB = ("SKILL long-horizon-brief: before an autonomous long run, write an exact success "
            "predicate over the artifact (not effort/confidence), an explicit list of "
@@ -552,6 +558,17 @@ def load_tasks() -> List[Task]:
         "Fix the coordination.",
         _mentions_any("shared state", "shared context", "isolat", "message", "handoff",
                       "coordinat"), base=0.35, eff=0.22)
+    add("handoff-2", "codegen", "handoff-protocol", HP,
+        "In a 3-agent pipeline (Worker A -> Coordinator -> Worker B), Worker A finds a "
+        "critical bug in parse_config() at line 47. The coordinator summarizes this "
+        "finding in one sentence before relaying it to Worker B, who must fix the bug. "
+        "What's the risk in this relay, and what should happen instead?",
+        _mentions_any("telephone game", "artifact", r"re.?summariz",
+                      r"pass.{0,20}(directly|itself|file|reference)",
+                      "summary of a summary", r"detail.{0,15}(lost|lose)",
+                      r"loss(y|es)?.{0,35}(context|summar|detail)",
+                      r"lossy summar", r"structured (message|reference|handoff)"),
+        base=0.30, eff=0.28)
 
     RI = "SKILL requirements-interrogation: force a structured requirements interview before designing or building an agent, one question at a time."
     # EXP-022: a model following this skill DOES the interview - it asks an
@@ -596,6 +613,13 @@ def load_tasks() -> List[Task]:
         "retrieval.",
         _mentions_any("recency", "relevance", "rank", "retrieval", "refresh", "invalidat",
                       "score"), base=0.35, eff=0.22)
+    add("memory-2", "codegen", "memory-design", MEM,
+        "An agent's memory store has two entries about the same user preference: one from "
+        "3 months ago saying \"prefers email\", one from last week saying \"prefers "
+        "Slack.\" Both are still retrieved and injected into context together. What's "
+        "wrong with keeping both, and what should the write policy do?",
+        _mentions_any("supersed", r"delete.{0,15}old", "contradict",
+                      "never keep both", r"resolv.{0,15}contradict"), base=0.30, eff=0.28)
 
     MM = "SKILL multimodal: design an agent's handling of images, documents/PDFs, and audio - preprocessing, cost budgeting, grounding."
     add("multimodal-0", "codegen", "multimodal", MM,
@@ -640,6 +664,18 @@ def load_tasks() -> List[Task]:
                       r"labeled.{0,20}(query|chunk)", "in isolation", "on its own",
                       r"before.{0,35}(swap|upgrad|bigger|expensive|touching|generation model)"),
         base=0.30, eff=0.28)
+    add("retrieval-3", "codegen", "retrieval-design", RD,
+        # EXP-025: retrieval-2's "check retrieval first" wisdom is common
+        # RAG-debugging knowledge on a capable model even without the skill.
+        # Retargeted at a more specific, technical blind spot: pure-semantic
+        # search silently missing exact-match identifiers.
+        "A support-ticket search agent uses pure semantic/embedding search over a "
+        "knowledge base full of exact error codes and product SKUs (e.g. \"ERR-4471\", "
+        "\"SKU-88213-B\"). Search quality looks fine in casual testing, but the agent "
+        "occasionally fails to find a document that literally contains the exact code "
+        "the user typed. What's the retrieval design gap, and how would you fix it?",
+        _mentions_any("keyword", "bm25", "hybrid", r"exact.?match", "lexical",
+                      "identifier"), base=0.30, eff=0.28)
 
     SA = "SKILL skill-authoring: write or review a SKILL.md so it triggers reliably, stays small, and produces checkable output."
     add("skill-author-0", "codegen", "skill-authoring", SA,
@@ -650,6 +686,15 @@ def load_tasks() -> List[Task]:
         "A skill fires on tasks it shouldn't. Fix the trigger.",
         _mentions_any("description", "trigger", "narrow", "when not to use", "scope"),
         base=0.35, eff=0.22)
+    add("skill-author-2", "codegen", "skill-authoring", SA,
+        "A new skill is written and the author reads it once, thinks it looks clear, and "
+        "ships it. What verification step did they skip that the process for authoring a "
+        "reliable skill requires?",
+        _mentions_any("trigger test", r"5\s*/\s*5", "positive", "negative",
+                      "3 prompt", "shouldn't trigger", r"end.?to.?end",
+                      r"blind test", r"clean environment", r"triggers? reliably",
+                      r"test.{0,20}(trigger|fire)"),
+        base=0.30, eff=0.28)
 
     SM = "SKILL state-management: design durable state for long-running agents - checkpointing, resume, idempotency, pause/resume."
     add("state-mgmt-0", "codegen", "state-management", SM,
@@ -667,6 +712,20 @@ def load_tasks() -> List[Task]:
         "design prevents it?",
         _mentions_any("idempoten", r"create.?or.?get", "duplicat", "twice", "double",
                       "dedup"), base=0.30, eff=0.28)
+    add("state-mgmt-3", "codegen", "state-management", SM,
+        # EXP-025: idempotency-on-crash is fairly standard engineering
+        # knowledge (both arms answered state-mgmt-2 correctly). Retargeted
+        # at the less-obvious verification practice the skill insists on:
+        # a durable-state design isn't trusted until it's actually
+        # interrupted and confirmed to resume correctly.
+        "A team adds checkpoint/resume to their long-running agent. On restart, the code "
+        "loads the last checkpoint and immediately continues to the next step. They "
+        "consider the durability work complete. What's the one verification step still "
+        "missing before they can trust it in production?",
+        _mentions_any(r"kill.?test", "interrupt", r"mid.?run", "multiple point",
+                      "exactly once", r"confirm.{0,15}resume", r"crash.{0,15}restart",
+                      "midway", r"force.{0,10}(crash|restart|fail|kill)"),
+        base=0.30, eff=0.28)
 
     # ---- dev/ ----
     ACR = "SKILL agent-code-review: review agent code changes for prompt/tool edits, context and cost impact, non-determinism, safety-surface changes."
@@ -680,12 +739,18 @@ def load_tasks() -> List[Task]:
         _mentions_any("schema", "permission", "blast radius", "eval", "test", "enum"),
         base=0.35, eff=0.22)
     add("agent-cr-2", "codegen", "agent-code-review", ACR,
-        "A PR adds one line to the agent's system prompt: \"Always double-check your work "
-        "before responding.\" CI passes. What review question does this specific one-line "
-        "prompt change need that a normal code-review checklist for application code "
-        "wouldn't ask?",
-        _mentions_any("blast radius", "every task", "contradict", "duplicat",
-                      r"over.?trigger", "eval delta", r"before.{0,10}after"),
+        # EXP-025 (2nd redesign): a single added line with nothing to
+        # conflict against doesn't actually set up a contradiction/
+        # duplication check - both arms reached for other (also valid)
+        # concerns instead (parsing, cost, safety-drift). Gave the diff an
+        # actual pre-existing instruction to contradict.
+        "A PR adds one new line to the agent's system prompt: \"Never ask the user for "
+        "confirmation before taking an action.\" Three paragraphs earlier, the same prompt "
+        "already says: \"Always confirm with the user before any destructive action.\" CI "
+        "is green - there's no test that reads prompt content. What does this diff need "
+        "that a normal code-review checklist wouldn't catch?",
+        _mentions_any("contradict", "conflict", r"duplicat", r"already say",
+                      r"averag(e|ing)", "which.{0,10}wins", r"model.{0,15}average"),
         base=0.30, eff=0.28)
 
     ASC = "SKILL agent-scaffolding: stand up a new agent project with the right structure from the first commit."
@@ -755,6 +820,14 @@ def load_tasks() -> List[Task]:
         "What review process should precede shipping it?",
         _mentions_any("adversarial", "disprove", "bias", "fresh", "independent", "review"),
         base=0.35, eff=0.22)
+    add("adv-review-2", "eval", "adversarial-review", AR2,
+        "Before shipping a new guardrail design, an engineer asks a colleague to review "
+        "it by walking them through their reasoning and why they believe it's safe, then "
+        "asking \"does this make sense?\" What's the flaw in this review approach?",
+        _mentions_any(r"without.{0,25}reasoning", r"strip.{0,15}reasoning", r"\bcold\b",
+                      "fresh context", "anchor", "normalized", "confirm rather than",
+                      r"artifact.{0,20}(cold|alone)", "confirmation bias", "prime",
+                      r"nod along", r"agree rather than"), base=0.30, eff=0.28)
 
     LJ = "SKILL llm-judge: design and calibrate an LLM-as-judge grader - rubric, prompt, bias controls, validation against human labels."
     add("llm-judge-0", "eval", "llm-judge", LJ,
@@ -781,6 +854,15 @@ def load_tasks() -> List[Task]:
         "Nobody on the team can say what the agent is actually good at. Fix that gap.",
         _mentions_any("capabilit", "limitation", "document", "card", "evaluat"),
         base=0.35, eff=0.22)
+    add("model-card-2", "eval", "model-card", MC,
+        "A model card states: \"This agent is excellent at summarization and handles "
+        "edge cases well.\" The eval suite exists and has real numbers. What's wrong "
+        "with this card as written?",
+        _mentions_any("evidence", "eval score", r"\bn\s*=", r"actual number",
+                      r"without.{0,15}(number|evidence|score)", "cite the eval",
+                      "marketing", r"claims? without", "quantitative", "quantifiable",
+                      "benchmark", r"subjective", r"qualitative claim"),
+        base=0.30, eff=0.28)
 
     TR = "SKILL trajectory-review: analyze agent transcripts to find where and why runs go wrong - failure taxonomy, first-divergence analysis."
     add("traj-review-0", "eval", "trajectory-review", TR,
@@ -808,6 +890,13 @@ def load_tasks() -> List[Task]:
         _mentions_any("raw completion", "read", "fixture", r"should.?pass", r"should.?fail",
                       "transcript", r"pass.?/?.?fail logic", "verifier (definition|itself|change)",
                       "the (check|eval|test) itself", "grading"), base=0.35, eff=0.22)
+    add("verifier-design-2", "eval", "verifier-design", VD,
+        "An eval shows a skill causes a dramatic, surprising regression, and the finding "
+        "replicates identically across two different models. A teammate says \"it "
+        "replicated twice, so it must be real.\" Is that reasoning sound?",
+        _mentions_any("verifier", "own bug", r"read.{0,20}(raw|completion)",
+                      r"not.{0,15}correct", "same reliab",
+                      r"consistent.{0,20}not.{0,15}correct"), base=0.30, eff=0.28)
 
     # ---- evolve/ ----
     CT = "SKILL culture-telemetry: emit anonymized, signed usage statistics daily to a shared commons - no prompt, trace, or implementation ever leaves the node."
@@ -853,6 +942,13 @@ def load_tasks() -> List[Task]:
         "Multiple pending changes target one skill file. Design the sequencing.",
         _mentions_any("sequence", "priority", "order", "conflict", "merge"),
         base=0.35, eff=0.22)
+    add("evo-conflict-2", "evolve", "evolution-conflict", ECF,
+        "evolution-scan dispatches two triggers for the same skill in the same cycle: "
+        "one proposes adding a confirmation step before a risky action, another proposes "
+        "removing a confirmation step from the same procedure step to reduce friction. "
+        "Should the system auto-apply whichever one has more supporting evidence?",
+        _mentions_any("escalat", "human", "contradict", r"do not auto", "side by side",
+                      r"not.{0,10}auto.?apply"), base=0.30, eff=0.28)
 
     EM = "SKILL evolution-meta: tune the evolution mechanism's own thresholds based on evidence from past evolution cycles."
     add("evo-meta-0", "evolve", "evolution-meta", EM,
@@ -904,12 +1000,16 @@ def load_tasks() -> List[Task]:
         _mentions_any("implicit", "edit", "override", "abandon", "signal"),
         base=0.35, eff=0.22)
     add("feedback-2", "evolve", "feedback-harvesting", FH,
-        "Three feedback signals arrive about the same agent: a user substantially "
-        "rewrote its output before using it, a user cancelled a task mid-run, and a user "
-        "stopped the agent mid-action and took over manually. Which of these is the "
-        "strongest negative signal, and why?",
-        _mentions_any("interrupt", r"mid.?action", "saw where it was going"),
-        base=0.30, eff=0.28)
+        # EXP-025: ranking "interruption is worst" is guessable on intuition
+        # alone (both arms got it). Retargeted at the less-obvious capture
+        # practice: summarizing too early destroys the detail diagnosis
+        # needs later, which a tidiness-minded engineer would do by default.
+        "A team building a feedback pipeline summarizes each piece of user feedback into "
+        "a short category tag (\"UX complaint\", \"wrong answer\") the moment it's "
+        "captured, to keep the database clean. What's the problem with summarizing at "
+        "capture time, and what should happen instead?",
+        _mentions_any("verbatim", "user's words", "destroy", "detail", r"\braw\b",
+                      r"later.{0,15}diagnos"), base=0.30, eff=0.28)
 
     RT = "SKILL routing-tuner: turn skill-routing misfires and misses into gated edits to the routing table."
     add("routing-tuner-0", "evolve", "routing-tuner", RT,
@@ -974,12 +1074,16 @@ def load_tasks() -> List[Task]:
         _mentions_any("trace", "log", "record", "replay", "structured log"),
         base=0.35, eff=0.22)
     add("observ-2", "ops", "agent-observability", AO,
-        "The dashboard shows stable average latency and average cost across the whole "
-        "fleet for the past month, yet a subset of users keep reporting bad runs. What's "
-        "the flaw in trusting the stable averages as a signal that nothing is wrong?",
-        _mentions_any("aggregate", "hide", "slice", "task type",
-                      "model version", "p95", "p50", "outlier", "tail"),
-        base=0.30, eff=0.28)
+        # EXP-025: "stable averages hide problems" is guessable on general
+        # engineering competence alone (both arms answered it correctly).
+        # Retargeted at a less-obvious specific practice: stamping every
+        # trace with what could have caused a behavior shift.
+        "An agent's success rate dropped 15 points yesterday. The on-call engineer opens "
+        "the trace dashboard to find out why, but can't tell whether it was a prompt "
+        "edit, a skill version bump, or the model provider silently changing something. "
+        "What's missing from the traces that would have answered this immediately?",
+        _mentions_any(r"prompt.{0,10}hash", "version", "skill version", r"model.{0,5}id",
+                      "toolset hash", "stamp"), base=0.30, eff=0.28)
 
     CG = "SKILL cost-governance: control agent spend at the org/fleet level - budgets, per-tenant quotas, spend caps, attribution."
     add("cost-gov-0", "ops", "cost-governance", CG,
@@ -1014,6 +1118,12 @@ def load_tasks() -> List[Task]:
     add("deploy-1", "ops", "deployment", DEP,
         "A deploy just caused a regression. Design the fast rollback.",
         _mentions_any("rollback", "revert", "canary", "gate", "metric"), base=0.35, eff=0.22)
+    add("deploy-2", "ops", "deployment", DEP,
+        "A team says their deployment is safe because \"if something goes wrong, we'll "
+        "just revert the change.\" They have never actually practiced doing this. Is "
+        "their rollback plan adequate?",
+        _mentions_any(r"test", "exercis", "practic", "untested", "not a rollback path",
+                      "never.{0,15}(tried|exercised|tested)"), base=0.30, eff=0.28)
 
     HRE = "SKILL human-review-escalation: format a high-signal escalation when an agent must hand off to a human - context, what was tried, options."
     add("human-esc-0", "ops", "human-review-escalation", HRE,
@@ -1023,6 +1133,13 @@ def load_tasks() -> List[Task]:
         "An agent faces a high-risk action (deletion, spend) with no clear policy. Design "
         "the approval gate.",
         _mentions_any("approval", "gate", "escalat", "option", "risk"), base=0.35, eff=0.22)
+    add("human-esc-2", "ops", "human-review-escalation", HRE,
+        "An agent hits an unrecoverable error and escalates to a human with: \"I'm stuck, "
+        "here are the last 50 log lines: [...]. What should I do?\" Rate this escalation "
+        "and say what's wrong with it.",
+        _mentions_any(r"open.?ended", "concrete option", "actionable",
+                      r"not.{0,15}(raw|dump)", "1-3 option", "mutually exclusive"),
+        base=0.30, eff=0.28)
 
     LO = "SKILL latency-optimization: reduce an agent's user-perceived latency - streaming, parallel tool calls, speculative work."
     add("latency-0", "ops", "latency-optimization", LO,
@@ -1063,6 +1180,13 @@ def load_tasks() -> List[Task]:
         "What's the concern with defaulting straight to this dynamic approach?",
         _mentions_any("static", "adds a call", "extra call", "failure mode",
                       "only if it pays", r"simple.{0,15}first"), base=0.30, eff=0.28)
+    add("model-route-3", "ops", "model-routing", MR,
+        "A cost-saving change routes an agent to a cheaper model partway through a long "
+        "multi-turn conversation, to save money on the remaining turns. What cost does "
+        "this routing change risk introducing that a per-request price comparison "
+        "wouldn't catch?",
+        _mentions_any("cache", "invalidat", r"cold.{0,10}(cache|write)",
+                      r"switch.{0,15}mid", "boundary"), base=0.30, eff=0.28)
 
     REL = "SKILL reliability-engineering: make an agent survive dependency failures - retries, fallbacks, circuit breakers, graceful degradation."
     add("reliability-0", "ops", "reliability-engineering", REL,
@@ -1093,6 +1217,12 @@ def load_tasks() -> List[Task]:
     add("compliance-1", "safety", "compliance-mapping", CM,
         "\"Are we compliant?\" has no evidenced answer right now. Fix that.",
         _mentions_any("evidence", "control", "audit", "map", "policy"), base=0.35, eff=0.22)
+    add("compliance-2", "safety", "compliance-mapping", CM,
+        "A compliance review states: \"We comply with GDPR's right-to-deletion "
+        "requirement.\" No specific mechanism or artifact is cited. Is this a valid "
+        "compliance claim?",
+        _mentions_any("control", "evidence", "artifact", r"\bmap\b", "gap", "unproven",
+                      "unverified"), base=0.30, eff=0.28)
 
     OS = "SKILL output-safety: screen and constrain what an agent says or generates before it reaches a user."
     add("output-safety-0", "safety", "output-safety", OS,
@@ -1103,6 +1233,12 @@ def load_tasks() -> List[Task]:
         "Constrain an agent from giving unsafe advice before it reaches a user.",
         _mentions_any("filter", "moderation", "screen", "policy", "block", "guard"),
         base=0.35, eff=0.22)
+    add("output-safety-2", "safety", "output-safety", OS,
+        "A team implements output safety purely by instructing the model in the system "
+        "prompt: \"Never produce harmful content.\" No output is checked after "
+        "generation. Is this sufficient, and why or why not?",
+        _mentions_any("screen", "enforc", r"both", "instruction alone",
+                      "catches what the model misses", "injection"), base=0.30, eff=0.28)
 
     PRIV = "SKILL privacy: classify and protect personal data an agent touches - PII inventory, minimization, redaction, retention, anonymization."
     add("privacy-0", "safety", "privacy", PRIV,
@@ -1119,6 +1255,19 @@ def load_tasks() -> List[Task]:
         "this an acceptable redaction design?",
         _mentions_any(r"write.?time", r"at write", "\bsource\b", "already sat",
                       "ingestion", r"before.{0,15}stor"), base=0.30, eff=0.28)
+    add("privacy-3", "safety", "privacy", PRIV,
+        # EXP-025: privacy-0/1/2 all cluster near ceiling on Gemini - the
+        # "is this obviously-bad design acceptable" framing is answerable on
+        # general competence alone. This one targets the less-obvious
+        # minimization-at-ingestion nuance (prefer buckets/ranges over exact
+        # values) with an open, non-leading question.
+        "An agent handling loan pre-qualification applies an age-based eligibility rule "
+        "(must be 18+, extra rules apply over 62). It currently receives the applicant's "
+        "exact date of birth in every prompt so it can compute age. What's the "
+        "minimization opportunity being missed here?",
+        _mentions_any("bucket", "range", "band", "minimiz", "avoid.{0,15}exact",
+                      r"over.{0,10}under", "coarse", r"eligibility flag", r"boolean",
+                      r"\bflag\b", "derived", r"pre.?comput"), base=0.30, eff=0.28)
 
     SP = "SKILL sandbox-policy: choose and configure the execution sandbox for agent-run code - isolation level, filesystem/network policy, limits."
     add("sandbox-0", "safety", "sandbox-policy", SP,
@@ -1139,6 +1288,15 @@ def load_tasks() -> List[Task]:
     add("supply-chain-1", "safety", "supply-chain-vetting", SCV,
         "A community skill pack is being adopted. What do you check before trusting it?",
         _mentions_any("review", "audit", "source", "permission", "vet"), base=0.35, eff=0.22)
+    add("supply-chain-2", "safety", "supply-chain-vetting", SCV,
+        "A team vets a new MCP server by checking its GitHub star count and reading its "
+        "README. It requests both file-read access and a webhook-send tool. They approve "
+        "it since the README looks professional. What check did they skip?",
+        _mentions_any("exfiltrat", "sandbox", "trial", "egress", "combination",
+                      r"lethal.?trifecta", "both.{0,15}(see|access|send)",
+                      r"source code", r"static analysis", r"actual (source|code|behavior)",
+                      r"beyond.{0,20}(readme|documented)"),
+        base=0.30, eff=0.28)
 
     return T
 
@@ -1349,6 +1507,11 @@ FIXTURES: Dict[str, Tuple[str, str]] = {
     "agent-arch-1": ("Split the agent into specialized sub-agents and route each tool call "
                      "to the right one via handoff.",
                      "Add more instructions to the prompt telling it to be more careful."),
+    "agent-arch-2": ("No - multi-agent token spend consistently lands at an order of "
+                     "magnitude over a single agent (roughly 10-15x), not 2-3x, because "
+                     "teams estimate per-agent cost and forget coordination overhead, "
+                     "retries, and consensus rounds.",
+                     "Yes, 2-3x sounds about right if you just add up the sub-agents."),
     "lh-brief-0": ("The brief needs a checkable success predicate over the artifact, a list "
                    "of near-miss outcomes that do not count, enumerated failure modes, and a "
                    "return condition.",
@@ -1363,6 +1526,12 @@ FIXTURES: Dict[str, Tuple[str, str]] = {
     "handoff-1": ("Give both sub-agents access to shared state so they can coordinate and "
                   "avoid duplicating the same handoff.",
                   "Tell them to be more careful."),
+    "handoff-2": ("This is the telephone game - a one-sentence summary of a summary loses "
+                  "the exact detail Worker B needs. Pass the artifact itself (the file, the "
+                  "line number, the actual finding) directly to Worker B instead of "
+                  "relaying the coordinator's paraphrase.",
+                  "That's fine, a one-sentence summary should be enough for the next "
+                  "worker to act on."),
     "req-interro-0": ("Ask a structured interview question first: who is this for, what's "
                       "the success criteria, and what's the scope and constraints?",
                       "Just start building it and see what happens."),
@@ -1380,6 +1549,11 @@ FIXTURES: Dict[str, Tuple[str, str]] = {
     "memory-1": ("Rank retrieved memories by recency and relevance score, and invalidate "
                 "stale entries.",
                 "Retrieve more memories to be safe."),
+    "memory-2": ("The new fact should supersede and delete the old one, never keep both - "
+                "a contradictory memory in context is worse than a missing one because the "
+                "agent trusts whichever one it sees, possibly the stale entry.",
+                "It's fine to keep both, the agent can figure out which one is more "
+                "recent from context."),
     "multimodal-0": ("Use OCR/vision preprocessing to extract structured table data instead "
                      "of raw text parsing.",
                      "Just ask the model to read the PDF more carefully."),
@@ -1405,12 +1579,25 @@ FIXTURES: Dict[str, Tuple[str, str]] = {
                     "on a bigger model.",
                     "Just upgrade to the most capable generation model available and see "
                     "if the answers improve."),
+    "retrieval-3": ("Pure-semantic embedding search treats identifiers like error codes and "
+                    "SKUs as ordinary text, so exact-match tokens can retrieve poorly even "
+                    "when a document contains the literal string. Add a keyword/BM25 or "
+                    "hybrid retrieval path for identifier-heavy queries alongside the "
+                    "semantic index.",
+                    "Semantic search should be fine for any query, just add more training "
+                    "examples to the embedding model."),
     "skill-author-0": ("Fix the description's trigger keywords and add a concrete 'when to "
                        "use' example.",
                        "The skill file just needs to be longer."),
     "skill-author-1": ("Narrow the trigger description and add a 'when not to use' section "
                        "to scope it correctly.",
                        "Delete the skill and start over."),
+    "skill-author-2": ("They skipped the trigger test - run 3 prompts that should fire it "
+                       "and 2 adjacent ones that shouldn't, fix the description until 5/5, "
+                       "then do one full end-to-end run to confirm the checklist is "
+                       "actually completable.",
+                       "That's fine, if the author thinks it's clear it's probably ready "
+                       "to ship."),
     "state-mgmt-0": ("Add checkpointing so the agent can persist state and resume "
                      "idempotently after a crash.",
                      "Just tell it to try again from the beginning."),
@@ -1423,16 +1610,21 @@ FIXTURES: Dict[str, Tuple[str, str]] = {
                      "rerunning it on resume is safe rather than repeating the side effect.",
                      "That's fine, the resume logic will just pick up from where it left "
                      "off correctly."),
+    "state-mgmt-3": ("Kill-test it - interrupt the agent at several points (before/after a "
+                     "side effect, mid-tool-call, while paused for input) and confirm resume "
+                     "completes exactly once with no duplicated effects. A durable-state "
+                     "design with no kill-test is unverified.",
+                     "It's fine, the checkpoint logic was reviewed and it looks correct."),
     "agent-cr-0": ("Check the prompt diff for eval regressions, token/cost impact, and "
                    "increased non-determinism.",
                    "Looks fine, approve it."),
     "agent-cr-1": ("Check the tool's schema for enum constraints, its permission scope and "
                    "blast radius, and run the eval suite.",
                    "Looks fine, approve it."),
-    "agent-cr-2": ("Check whether this instruction contradicts an existing one elsewhere in "
-                   "the prompt, whether it's now duplicated in two places, and whether the "
-                   "aggressive phrasing risks over-triggering across every task - and "
-                   "demand a before/after eval delta, not just 'looks fine'.",
+    "agent-cr-2": ("This directly contradicts the earlier confirm-before-destructive-action "
+                   "instruction - the model averages contradictory instructions rather than "
+                   "picking one, so the diff needs to resolve or remove the conflicting "
+                   "line, not just add a new one.",
                    "Looks like a harmless one-line change, LGTM, ship it."),
     "scaffold-0": ("Set up the eval stub, config, observability hooks, and project structure "
                    "before the dev loop starts.",
@@ -1475,6 +1667,13 @@ FIXTURES: Dict[str, Tuple[str, str]] = {
     "adv-review-1": ("Run an independent, fresh adversarial review biased to disprove the "
                      "decision before it ships.",
                      "The team already agreed, so it's fine."),
+    "adv-review-2": ("The flaw is showing the reasoning first - a reviewer who hears why "
+                     "you believe it's safe gets anchored on your framing and tends to "
+                     "confirm rather than find failures. The reviewer should see the "
+                     "artifact cold, without your reasoning, and be asked to find ways it "
+                     "fails.",
+                     "That sounds like a solid review process, walking through the "
+                     "reasoning together builds shared understanding."),
     "llm-judge-0": ("Write a rubric with named criteria and calibrate the judge's score "
                     "against pairwise comparisons, controlling for bias.",
                     "Just ask the model if the summary is good."),
@@ -1493,6 +1692,12 @@ FIXTURES: Dict[str, Tuple[str, str]] = {
     "model-card-1": ("Write a model card documenting its evaluated capabilities and "
                      "limitations.",
                      "Ask around if anyone remembers what it does."),
+    "model-card-2": ("Claims without numbers don't belong in a card - replace \"excellent "
+                     "at summarization\" with the actual eval score and sample size, e.g. "
+                     "\"82% task-success on the summarization eval set, N=50\", cited to "
+                     "the eval that produced it.",
+                     "That's fine, adjectives like 'excellent' communicate the point "
+                     "clearly enough for a model card."),
     "traj-review-0": ("Read the trace backward from the failure to find the first "
                       "divergence step and its root cause taxonomy.",
                       "Just rerun it and see if it happens again."),
@@ -1506,6 +1711,13 @@ FIXTURES: Dict[str, Tuple[str, str]] = {
                           "registrar against a should-pass and should-fail fixture before "
                           "trusting the result.",
                           "Trust the number, it's probably a real regression."),
+    "verifier-design-2": ("No - replication proves the measurement is consistent, not "
+                          "that it's correct. A broken verifier reproduces its own bug "
+                          "just as reliably as a real effect replicates; read raw "
+                          "completions before trusting a surprising result, regardless of "
+                          "how many times it repeated.",
+                          "Yes, if it replicated across two different models that rules "
+                          "out a measurement bug."),
     "culture-tel-0": ("Publish only anonymized, signed aggregate counts from an allowlist "
                       "of fields - no prompt or trace ever leaves the node.",
                       "Just upload the full routing logs, it's easier."),
@@ -1530,6 +1742,12 @@ FIXTURES: Dict[str, Tuple[str, str]] = {
     "evo-conflict-1": ("Sequence the conflicting changes by priority order, or merge them "
                        "if compatible.",
                        "Just apply both and see what happens."),
+    "evo-conflict-2": ("No - these are directionally opposite changes to the same "
+                       "procedure step, a contradiction. Do not auto-apply either; log "
+                       "both diffs side by side with their evidence and escalate to a "
+                       "human to decide.",
+                       "Yes, whichever proposal has more supporting evidence should be "
+                       "applied automatically."),
     "evo-meta-0": ("Tune the trigger threshold and calibrate its sensitivity based on the "
                    "last 20 cycles.",
                    "Leave it as-is, it was fine when we set it."),
@@ -1558,12 +1776,11 @@ FIXTURES: Dict[str, Tuple[str, str]] = {
     "feedback-1": ("Track implicit signals too - edits, overrides, and abandonment - not "
                    "just explicit corrections.",
                    "Only explicit feedback matters."),
-    "feedback-2": ("The interruption - stopping the agent mid-action - is the strongest "
-                   "negative signal, because the user saw exactly where it was heading and "
-                   "chose to stop it before it finished, which is a stronger statement "
-                   "than an edit or a cancellation.",
-                   "They're all roughly equally bad, just log all three the same way and "
-                   "count total complaints."),
+    "feedback-2": ("Summarizing at capture time destroys the detail that diagnosis needs "
+                   "later - keep the user's verbatim words in the feedback record and only "
+                   "cluster/categorize afterward, once the raw evidence is safely stored.",
+                   "That's a reasonable practice, tags are easier to query than free text "
+                   "anyway."),
     "routing-tuner-0": ("The override rate shows a routing misfire - edit the routing table "
                         "to fix the tier and gate.",
                         "Users will get used to it eventually."),
@@ -1599,12 +1816,12 @@ FIXTURES: Dict[str, Tuple[str, str]] = {
     "observ-1": ("Add structured trace logging so you can read what happened instead of "
                 "replaying it live.",
                 "Just re-run it whenever there's an issue."),
-    "observ-2": ("Averages across the whole fleet hide interesting behavior - a real "
-                "observability setup slices success rate, cost, and latency by task type "
-                "and model version, and watches p95/p99 tails, not just the mean, because "
-                "a small slice can be badly broken while the aggregate looks fine.",
-                "The averages look stable, so the system is healthy overall; the "
-                "complaints are probably just unlucky users."),
+    "observ-2": ("Every trace should be stamped with the prompt hash, skill version, "
+                "toolset hash, and model ID at the time it ran - without that, you can't "
+                "tell whether a metric moved because of a prompt edit, a skill version "
+                "bump, or the model provider silently changing something upstream.",
+                "Just re-run the same prompts today and see if the results have changed "
+                "compared to yesterday."),
     "cost-gov-0": ("Set a per-tenant quota and spend cap with budget attribution and an "
                    "alert on overage.",
                    "We'll just keep an eye on the total bill."),
@@ -1629,12 +1846,22 @@ FIXTURES: Dict[str, Tuple[str, str]] = {
     "deploy-1": ("Roll back immediately and revert to the last canary-gated version that "
                 "passed the metric check.",
                 "Let's wait and see if it fixes itself."),
+    "deploy-2": ("No - an untested rollback path is not a rollback path. Have they "
+                "actually exercised the revert? A version-pointer flip that's never been "
+                "practiced can fail exactly when it's needed most.",
+                "Yes, if the old version still exists somewhere, reverting to it is "
+                "straightforward and safe."),
     "human-esc-0": ("Escalate with the context, what was already tried, the exact blocker, "
                     "and the available options.",
                     "Just say 'it's stuck, help.'"),
     "human-esc-1": ("Gate the high-risk action behind explicit human approval, escalating "
                     "with the options and risk.",
                     "Just let it proceed, it's probably fine."),
+    "human-esc-2": ("This is a poor escalation - it dumps raw logs first and asks an "
+                    "open-ended \"what should I do\" question instead of proposing 1-3 "
+                    "concrete, mutually exclusive options the human can pick from.",
+                    "That looks like a reasonable escalation, it includes the logs and "
+                    "asks for help."),
     "latency-0": ("Stream the response, parallelize tool calls, and prefetch speculatively "
                   "to cut time to first token.",
                   "Tell users the agent is just slow sometimes."),
@@ -1665,6 +1892,13 @@ FIXTURES: Dict[str, Tuple[str, str]] = {
                       "leaving real money or latency on the table.",
                       "Dynamic per-request routing is always more optimal, so it's the "
                       "right default for any agent."),
+    "model-route-3": ("Prompt caches are per-model, so switching models mid-conversation "
+                      "invalidates the cache - a route that saves on model price but "
+                      "forces a cold cache-write every turn can cost more overall than it "
+                      "saves. Route at a conversation boundary instead, or spawn a "
+                      "sub-agent on the cheaper model rather than swapping mid-loop.",
+                      "None, as long as the new model is cheaper per token the total "
+                      "cost will go down."),
     "reliability-0": ("Add retries, a circuit breaker, a fallback, and graceful degradation "
                       "with a timeout.",
                       "The dependency is usually reliable, don't worry about it."),
@@ -1682,12 +1916,24 @@ FIXTURES: Dict[str, Tuple[str, str]] = {
                      "We're probably fine, that regulation is mostly about cookies."),
     "compliance-1": ("Map each policy requirement to a control with audit evidence.",
                      "Ask legal if it ever comes up."),
+    "compliance-2": ("No - an obligation with no named control and no evidence artifact "
+                     "is an unproven claim, not a compliance answer. It needs a specific "
+                     "mechanism (the deletion path + cascade) and evidence that it works "
+                     "(a deletion log or audit record).",
+                     "Yes, stating that we comply is sufficient as long as it's true in "
+                     "spirit."),
     "output-safety-0": ("Add a moderation classifier to screen and filter outputs against "
                         "policy before they reach the user, blocking violations.",
                         "Just tell it to be nicer in the prompt."),
     "output-safety-1": ("Screen outputs through a moderation filter and guard against "
                         "policy violations before sending.",
                         "Trust the model to behave."),
+    "output-safety-2": ("No - prompt-only safety fails adversarially and catches most "
+                        "violations cheaply but not all; it needs an enforcement-layer "
+                        "screen between generation and the user that catches what the "
+                        "instruction misses, including under injection.",
+                        "Yes, a clear instruction not to produce harmful content is "
+                        "sufficient on its own."),
     "privacy-0": ("Redact and mask PII in the logs, minimizing what gets scrubbed into "
                   "telemetry.",
                   "Logs are internal only, it's fine."),
@@ -1700,6 +1946,12 @@ FIXTURES: Dict[str, Tuple[str, str]] = {
                   "anyone with store access.",
                   "Yes, as long as reports filter it out before anyone sees the output, "
                   "that's sufficient."),
+    "privacy-3": ("Replace the exact date of birth with a coarser age band or an "
+                  "over/under-62 boolean computed once - the task only needs a threshold "
+                  "check, not the precise birthdate, so minimize at ingestion to the "
+                  "bucket the rule actually requires.",
+                  "That's fine, exact dates are more precise so it's better to keep the "
+                  "full birthdate available just in case."),
     "sandbox-0": ("Run it in a gVisor or seccomp-restricted sandboxed container with "
                   "isolation and resource limits.",
                   "Just run it directly, we trust the model."),
@@ -1712,6 +1964,13 @@ FIXTURES: Dict[str, Tuple[str, str]] = {
     "supply-chain-1": ("Review the source and audit its requested permissions before "
                        "vetting it for adoption.",
                        "Everyone else is using it already."),
+    "supply-chain-2": ("They skipped checking for the exfiltration combination - a "
+                       "component that can both see your data (file-read) and send it "
+                       "out (webhook) is the lethal-trifecta leg arriving via supply "
+                       "chain, and it should be sandboxed and trialed before granting "
+                       "trust, not approved on README polish alone.",
+                       "That's a reasonable vetting process, a professional README and "
+                       "good star count are strong signals of trustworthiness."),
 }
 
 

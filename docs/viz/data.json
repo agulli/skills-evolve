@@ -1,9 +1,9 @@
 {
- "generated": "2026-07-25",
+ "generated": "2026-07-26",
  "n_skills": 61,
- "n_win_fdr": 31,
+ "n_win_fdr": 36,
  "n_loss": 0,
- "n_ceiling": 4,
+ "n_ceiling": 2,
  "haiku_covered": 29,
  "effects": [
   {
@@ -15,23 +15,23 @@
   },
   {
    "skill": "adversarial-review",
-   "effect": 0.033,
-   "lo": -0.012,
-   "hi": 0.079,
+   "effect": 0.044,
+   "lo": 0.002,
+   "hi": 0.087,
    "verdict": "nsig"
   },
   {
    "skill": "agent-architecture",
-   "effect": 0.017,
-   "lo": -0.016,
-   "hi": 0.049,
+   "effect": 0.044,
+   "lo": -0.042,
+   "hi": 0.131,
    "verdict": "nsig"
   },
   {
    "skill": "agent-code-review",
-   "effect": 0.0,
-   "lo": 0.0,
-   "hi": 0.0,
+   "effect": -0.044,
+   "lo": -0.087,
+   "hi": -0.002,
    "verdict": "nsig"
   },
   {
@@ -50,10 +50,10 @@
   },
   {
    "skill": "agent-observability",
-   "effect": 0.0,
-   "lo": 0.0,
-   "hi": 0.0,
-   "verdict": "ceiling"
+   "effect": 0.011,
+   "lo": -0.011,
+   "hi": 0.033,
+   "verdict": "nsig"
   },
   {
    "skill": "agent-scaffolding",
@@ -71,10 +71,10 @@
   },
   {
    "skill": "compliance-mapping",
-   "effect": 0.033,
-   "lo": -0.012,
-   "hi": 0.079,
-   "verdict": "nsig"
+   "effect": 0.2,
+   "lo": 0.117,
+   "hi": 0.283,
+   "verdict": "win"
   },
   {
    "skill": "context-degradation",
@@ -113,9 +113,9 @@
   },
   {
    "skill": "deployment",
-   "effect": 0.033,
-   "lo": -0.012,
-   "hi": 0.079,
+   "effect": 0.022,
+   "lo": -0.008,
+   "hi": 0.053,
    "verdict": "nsig"
   },
   {
@@ -134,9 +134,9 @@
   },
   {
    "skill": "evolution-conflict",
-   "effect": 0.017,
-   "lo": -0.016,
-   "hi": 0.049,
+   "effect": -0.022,
+   "lo": -0.084,
+   "hi": 0.039,
    "verdict": "nsig"
   },
   {
@@ -183,16 +183,16 @@
   },
   {
    "skill": "handoff-protocol",
-   "effect": 0.033,
-   "lo": -0.012,
-   "hi": 0.079,
-   "verdict": "nsig"
+   "effect": 0.089,
+   "lo": 0.016,
+   "hi": 0.162,
+   "verdict": "win"
   },
   {
    "skill": "human-review-escalation",
-   "effect": 0.017,
-   "lo": -0.016,
-   "hi": 0.049,
+   "effect": 0.044,
+   "lo": -0.024,
+   "hi": 0.113,
    "verdict": "nsig"
   },
   {
@@ -239,16 +239,16 @@
   },
   {
    "skill": "memory-design",
-   "effect": 0.033,
-   "lo": 0.001,
-   "hi": 0.065,
+   "effect": 0.022,
+   "lo": -0.008,
+   "hi": 0.053,
    "verdict": "nsig"
   },
   {
    "skill": "model-card",
-   "effect": 0.033,
-   "lo": 0.001,
-   "hi": 0.065,
+   "effect": 0.011,
+   "lo": -0.027,
+   "hi": 0.049,
    "verdict": "nsig"
   },
   {
@@ -260,9 +260,9 @@
   },
   {
    "skill": "model-routing",
-   "effect": 0.056,
-   "lo": -0.016,
-   "hi": 0.127,
+   "effect": 0.092,
+   "lo": 0.005,
+   "hi": 0.178,
    "verdict": "nsig"
   },
   {
@@ -274,17 +274,17 @@
   },
   {
    "skill": "output-safety",
-   "effect": 0.017,
-   "lo": -0.016,
-   "hi": 0.049,
+   "effect": 0.022,
+   "lo": -0.021,
+   "hi": 0.066,
    "verdict": "nsig"
   },
   {
    "skill": "privacy",
-   "effect": 0.0,
-   "lo": -0.031,
-   "hi": 0.031,
-   "verdict": "nsig"
+   "effect": 0.05,
+   "lo": 0.005,
+   "hi": 0.095,
+   "verdict": "win"
   },
   {
    "skill": "prompt-architecture",
@@ -358,10 +358,10 @@
   },
   {
    "skill": "skill-authoring",
-   "effect": 0.017,
-   "lo": -0.016,
-   "hi": 0.049,
-   "verdict": "nsig"
+   "effect": 0.078,
+   "lo": 0.022,
+   "hi": 0.133,
+   "verdict": "win"
   },
   {
    "skill": "skill-distillation",
@@ -379,16 +379,16 @@
   },
   {
    "skill": "state-management",
-   "effect": 0.0,
-   "lo": 0.0,
-   "hi": 0.0,
-   "verdict": "ceiling"
+   "effect": -0.033,
+   "lo": -0.085,
+   "hi": 0.018,
+   "verdict": "nsig"
   },
   {
    "skill": "supply-chain-vetting",
-   "effect": 0.042,
+   "effect": 0.067,
    "lo": -0.001,
-   "hi": 0.084,
+   "hi": 0.134,
    "verdict": "nsig"
   },
   {
@@ -428,10 +428,10 @@
   },
   {
    "skill": "verifier-design",
-   "effect": 0.1,
-   "lo": -0.058,
-   "hi": 0.258,
-   "verdict": "nsig"
+   "effect": 0.278,
+   "lo": 0.167,
+   "hi": 0.389,
+   "verdict": "win"
   }
  ],
  "cross": [
@@ -444,13 +444,13 @@
   {
    "skill": "agent-architecture",
    "haiku": 0.083,
-   "gemini": 0.017,
+   "gemini": 0.044,
    "cat": "neither"
   },
   {
    "skill": "agent-code-review",
    "haiku": 0.0,
-   "gemini": 0.0,
+   "gemini": -0.044,
    "cat": "neither"
   },
   {
@@ -498,8 +498,8 @@
   {
    "skill": "handoff-protocol",
    "haiku": 0.017,
-   "gemini": 0.033,
-   "cat": "neither"
+   "gemini": 0.089,
+   "cat": "one"
   },
   {
    "skill": "injection-audit",
@@ -528,7 +528,7 @@
   {
    "skill": "memory-design",
    "haiku": 0.05,
-   "gemini": 0.033,
+   "gemini": 0.022,
    "cat": "neither"
   },
   {
@@ -576,13 +576,13 @@
   {
    "skill": "skill-authoring",
    "haiku": 0.0,
-   "gemini": 0.017,
-   "cat": "neither"
+   "gemini": 0.078,
+   "cat": "one"
   },
   {
    "skill": "state-management",
    "haiku": 0.0,
-   "gemini": 0.0,
+   "gemini": -0.033,
    "cat": "neither"
   },
   {

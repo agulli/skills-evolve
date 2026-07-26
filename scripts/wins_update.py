@@ -36,12 +36,8 @@ def main():
     merged = dict(base)
     merged.update(hurts_fix)
     merged.update(nearmiss)
-    if len(sys.argv) > 1:
-        ceiling = json.load(open(sys.argv[1]))["skill_effects"]
-        merged.update(ceiling)
-    if len(sys.argv) > 2:
-        recheck = json.load(open(sys.argv[2]))["skill_effects"]
-        merged.update(recheck)
+    for path in sys.argv[1:]:
+        merged.update(json.load(open(path))["skill_effects"])
 
     skills = sorted(merged)
     pv = {s: p_from_ci(merged[s]["effect"], *merged[s]["effect_ci95"]) for s in skills}

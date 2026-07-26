@@ -149,7 +149,7 @@ text{font-family:ui-monospace,monospace;font-variant-numeric:tabular-nums}
   </div>
 
   <p class="foot">Verdicts and gaps in full: <span class="mono">PROOF.md</span>. Method trail:
-    <span class="mono">EXPERIMENTS.md</span> (EXP-001…024). Cross-model chart covers the
+    <span class="mono">EXPERIMENTS.md</span> (EXP-001…025). Cross-model chart covers the
     <span id="crossn" class="mono"></span> skills measured on both models so far; the remaining Haiku
     measurements were budget-capped and complete separately. FDR = Benjamini-Hochberg at q=0.05.</p>
 </div>
@@ -174,7 +174,7 @@ document.getElementById('crossn').textContent=D.haiku_covered;
 const cards=[
  {k:'Skills useful',v:`${D.n_win_fdr} / ${D.n_skills}`,n:`FDR-significant wins · ${D.n_loss} losses`,cls:'good',pill:['partial','partial']},
  {k:'Router',v:`${D.router.gemini_top1}%`,n:`top-1 both models · ${D.router.false_fire}% false-fire`,cls:'accent',pill:['proven','proven']},
- {k:'Eval robust',v:'174/174',n:'fixture gate · CIs replicate',cls:'accent',pill:['proven','proven']},
+ {k:'Eval robust',v:'191/191',n:'fixture gate · CIs replicate',cls:'accent',pill:['proven','proven']},
  {k:'Local evolution',v:'1.0 / 1.0',n:'precision / recall on real data',cls:'good',pill:['proven','proven']},
  {k:'Global culture',v:'leak-proof',n:'blocks attackers to sybil 16',cls:'',pill:['mech','mechanism']},
 ];

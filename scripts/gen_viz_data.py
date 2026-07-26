@@ -31,7 +31,9 @@ G.update(load("gemini_hurts_recheck_20260723.json"))
 G.update(load("gemini_nearmiss7_20260725.json"))
 G.update(load("gemini_ceiling14_20260725.json"))
 G.update(load("gemini_retrieval_recheck_20260725.json"))
-H = merge("haiku_full61_20260723.json", "haiku_full61_part2_20260724.json")
+G.update(load("gemini_round2_20260726.json"))
+H = merge("haiku_full61_20260723.json", "haiku_full61_part2_20260724.json",
+          "haiku_full61_part2_20260726.json")
 
 skills = sorted(G)
 gp = {s: p_from_ci(G[s]["effect"], *G[s]["effect_ci95"]) for s in skills}
@@ -83,7 +85,7 @@ n_win=sum(1 for e in effects if e["verdict"]=="win")
 n_loss=sum(1 for e in effects if e["verdict"]=="loss")
 n_ceiling=sum(1 for e in effects if e["verdict"]=="ceiling")
 data={
- "generated": "2026-07-25",
+ "generated": "2026-07-26",
  "n_skills": len(skills), "n_win_fdr": n_win, "n_loss": n_loss, "n_ceiling": n_ceiling,
  "haiku_covered": len(both),
  "effects": effects, "cross": cross, "retract": retract, "adversarial": adversarial,
